@@ -1,9 +1,9 @@
-if ( window.outletLocator === undefined ) {
+if ( window.businessLocator === undefined ) {
 
-    window.outletLocator = {};
+    window.businessLocator = {};
 }
 
-window.outletLocator.locations = [{
+window.businessLocator.locations = [{
 
     "Type": "Vitalgas",
     "LocationTitle": "Ti Tree Roadhouse",
@@ -39,7 +39,7 @@ window.outletLocator.locations = [{
     "LocationTitle": "A J Petroleum",
     "Address1": "77 Benalla Rd",
     "Suburb": "Shepparton",
-    "Postcode": 3630,
+    "Postcode": 3630,s
     "Latitude": -36.38,
     "Longitude": 145.42,
     "ZoomLevel": 5,
