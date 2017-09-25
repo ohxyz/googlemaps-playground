@@ -27,29 +27,45 @@ var locations = [
 
 ];
 
+
+var geoCoords1 = { lat: -21.38, lng: 133.93 };
+var geoCoords2 = { lat: -37.7934059, lng: 144.9471224 };
+
+
 function initMap() {
-    
-    var location0 = { lat: -21.38, lng: 133.93 };
-    var location1 = { lat: -37.7934059, lng: 144.9471224 };
 
     var map = new google.maps.Map( document.getElementById('map'), {
       
         zoom: 5,
-        center: location0
+        center: geoCoords1
     });
 
     var marker0 = new google.maps.Marker( {
 
-        position: location0,
+        position: geoCoords1,
         map: map,
         icon: "marker-oe.png"
     } );
 
     var marker1 = new google.maps.Marker( {
 
-        position: location1,
+        position: geoCoords2,
         map: map,
         icon: "marker-oe.png"
     } );
 
+
+    function calculateDistance( geoCoords1, geoCoords2 ) {
+
+        var latLng1 = new google.maps.LatLng( geoCoords1 );
+        var latLng2 = new google.maps.LatLng( geoCoords2 );
+
+        var distance = google.maps.geometry.spherical.computeDistanceBetween( latLng1, latLng2 );
+
+        return distance;
+    }
+
+    var dist = calculateDistance( geoCoords1, geoCoords2 );
+    console.log( 'x', dist );
 }
+
