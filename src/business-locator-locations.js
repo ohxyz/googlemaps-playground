@@ -3,7 +3,7 @@ if ( window.businessLocator === undefined ) {
     window.businessLocator = {};
 }
 
-window.businessLocator.locations = [{
+window.businessLocator.locations = [ {
 
     "Type": "Vitalgas",
     "LocationTitle": "Ti Tree Roadhouse",
@@ -39,7 +39,7 @@ window.businessLocator.locations = [{
     "LocationTitle": "A J Petroleum",
     "Address1": "77 Benalla Rd",
     "Suburb": "Shepparton",
-    "Postcode": 3630,s
+    "Postcode": 3630,
     "Latitude": -36.38,
     "Longitude": 145.42,
     "ZoomLevel": 5,
@@ -12664,4 +12664,4 @@ window.businessLocator.locations = [{
     "CountryCode": "AU",
     "StateRegion": "NSW",
     "StateRegionFull": "New South Wales"
-}];
+} ];

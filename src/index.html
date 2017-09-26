@@ -10,10 +10,13 @@
   </head>
   <body>
     <h3>My Google Maps Demo</h3>
-    <div id="map"></div>
-    <script src="business-locator-coordinates.js"></script>
+    <div id="business-locator">
+      <div id="search-results"></div>
+    </div>
+    <script src="jquery.min.js"></script>
+    <script src="business-locator-locations.js"></script>
     <script src="business-locator.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=businessLocator.initMap"></script>
   </body>
 </html>
       
