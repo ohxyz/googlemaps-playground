@@ -171,18 +171,29 @@ if ( window.businessLocator === undefined ) {
     ui.map = ( function () {
 
         var mapDiv = document.createElement( 'div' );
+
         mapDiv.setAttribute( 'id', 'map' );
 
-        function generateMap() {
+        var uluru = { lat: -25.363, lng: 131.044 };
 
-            var uluru = { lat: -25.363, lng: 131.044 };
+
+        function generateMap( mapCenter) {
+            
             var mapOptions = {
 
                 zoom: 4,
-                center: uluru
+                center: mapCenter
             };
 
-            return new google.maps.Map( mapDiv, mapOptions );
+            var map = new google.maps.Map( mapDiv, mapOptions );
+
+            map.addListener( 'bounds_changed', function () {
+
+                map.setCenter( uluru );
+
+            } );
+
+            return map;
 
         }
 
@@ -199,7 +210,6 @@ if ( window.businessLocator === undefined ) {
                     lat: businessLocation[ 'Latitude' ],
                     lng: businessLocation[ 'Longitude' ]
                 } );
-
 
                 var marker = new google.maps.Marker( {
 
@@ -225,12 +235,11 @@ if ( window.businessLocator === undefined ) {
                 } );
 
             } );
-
         }
 
         function init() {
 
-            var map = generateMap();
+            var map = generateMap( uluru );
             populateMarkers( map, dummyLocations );
 
         }
@@ -248,10 +257,10 @@ if ( window.businessLocator === undefined ) {
      *  Build DOM elements into document
      *
      */
-    ui.build = function () {
+    ui.init = function () {
 
-        var uiDom = this.ui.dom;
-        var uiMap = this.ui.map;
+        var uiDom = ui.dom;
+        var uiMap = ui.map;
 
         uiMap.init();
         uiDom.$container.append( uiDom.$buildSearchSection(), uiMap.container );
@@ -262,33 +271,98 @@ if ( window.businessLocator === undefined ) {
      * Compute module container
      *
      */
-    var compute = {};
+    var compute = ( function () {
+
+        /*
+         * Calculate distance between two coordinates
+         *
+         */ 
+        function calculateDistance( geoCoords1, geoCoords2 ) {
+
+            var latLng1 = new google.maps.LatLng( geoCoords1 );
+            var latLng2 = new google.maps.LatLng( geoCoords2 );
+
+            var distance = google.maps.geometry.spherical.computeDistanceBetween( latLng1, latLng2 );
+
+            return distance;
+        };
+
+
+        /*
+         *
+         *
+         * @todo Handle failed requests
+         */
+        function getCoords( address, onSuccess ) {
+
+            var geocoder = new google.maps.Geocoder();
+
+            geocoder.geocode( {
+
+                address: address,
+
+                componentRestrictions: {
+
+                    country: 'AU'
+
+                }
+
+            }, function( results, status ) { 
+
+                if ( status === 'OK' ) {
+
+                    onSuccess( results );
+                }
+                else {
+
+                    console.error( 'Geocoder request failed.' );
+                }
+
+            } );
+
+        }
+
+        /*
+         * Main in compute module
+         *
+         */
+        function init( ) {
+
+            function handleSuccess( results ) {
+
+                console.log( 1, results, status );
+
+            }
+
+            // Test
+            getCoords( 'Melbourne', handleSuccess );
+
+        }
+
+
+        return {
+
+            calculateDistance: calculateDistance,
+            getCoords: getCoords,
+            init: init
+
+        };
+
+    } )();
 
 
     /*
-     * Calculate distance between two coordinates
-     *
-     */ 
-    compute.calculateDistance = function ( geoCoords1, geoCoords2 ) {
-
-        var latLng1 = new google.maps.LatLng( geoCoords1 );
-        var latLng2 = new google.maps.LatLng( geoCoords2 );
-
-        var distance = google.maps.geometry.spherical.computeDistanceBetween( latLng1, latLng2 );
-
-        return distance;
-    };
-
-
-    /*
-     * START: Main
+     * Main
      *
      */
     my.ui = ui;
     my.compute = compute;
 
-    // Create a shortcut
-    my.init = ui.build;
+    my.init = function () {
+
+        ui.init();
+        compute.init();
+    };
 
     return my;
 
