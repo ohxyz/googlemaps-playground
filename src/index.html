@@ -1,22 +1,35 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <style>
-       #map {
+    #map {
         height: 400px;
         width: 100%;
-       }
+    }
     </style>
-  </head>
-  <body>
-    <h3>My Google Maps Demo</h3>
-    <div id="business-locator">
-      <div id="search-results"></div>
-    </div>
+    <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
+</head>
+
+<body>
+    <h2>Code Test</h2>
+    <div id="mocha"></div>
+    <h2>UI Test</h2>
+    <div id="business-locator"></div>
+
+    <!-- Dev scripts -->
     <script src="jquery.min.js"></script>
+
     <script src="business-locator-locations.js"></script>
     <script src="business-locator.js"></script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=businessLocator.initMap"></script>
-  </body>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=businessLocator.init"></script>
+
+    <!-- Test scripts -->
+    <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.1.2/chai.min.js"></script>
+
+    <script src="unit-test.js"></script>
+</body>
+
 </html>
-      

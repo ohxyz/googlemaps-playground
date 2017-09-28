@@ -4,12 +4,28 @@
  * @requires jQuery
  *
  */
-
 var dummyLocations = [
 
     {
+        "Type": "Vitalgas",
+        "LocationTitle": "Caltex Tempora",
+        "Address1": "109 Hoskins St",
+        "Suburb": "Temora",
+        "Postcode": 2666,
+        "Latitude": -34.44,
+        "Longitude": 147.53,
+        "ZoomLevel": 5,
+        "PhoneNumber": "02 6977 1265",
+        "Archived": 0,
+        "CreationDate": "1/4/14 16:16",
+        "CountryCode": "AU",
+        "StateRegion": "NSW",
+        "StateRegionFull": "New South Wales"
+    },
+
+    {
         "type": "VitalGas",
-        "LocationTitle:": "Ti Tree Roadhouse",
+        "LocationTitle": "Ti Tree Roadhouse",
         "Address1": "Stuart Highway",
         "Suburb": "Ti Tree",
         "Postcode": "872",
@@ -21,13 +37,6 @@ var dummyLocations = [
         "CreationDate": "AU",
         "StateRegion": "NT",
         "StateRegionFull": "Northern Territory"
-    },
-
-    {
-        "LocationTitle": "Avbar Pty Ltd - North Melbourne",
-        "Address1": "Cnr Abbotsford & Flemington Rds",
-        "Latitude": -37.7934059,
-        "Longitude": 144.9471224
     },
 
     {
@@ -66,8 +75,6 @@ var dummyLocations = [
 
 ];
 
-
-
 function ModuleNotFoundError( moduleName ) {
 
     this.message = 'Require module: ' + moduleName + '.';
@@ -85,14 +92,24 @@ if ( window.businessLocator === undefined ) {
 
 ( function ( my, $ ) {
 
-    /* UI module container */
-    var ui = { };
-
     /* 
-     * UI DOM module
+     * UI module container 
+     * 
+     * ui - module ------ dom - submodule
+     *               |
+     *                --- map - submodule
+     *               |
+     *                --- build - method
      *
      */
-    ui.dom = function () {
+    var ui = {};
+
+
+    /* 
+     * UI DOM submodule
+     *
+     */
+    ui.dom = ( function () {
 
         var $businessLocatorDiv = $( '#business-locator' );
 
@@ -144,13 +161,14 @@ if ( window.businessLocator === undefined ) {
             $buildSearchSection: $buildSearchSection
         };
 
-    };
+    } )();
+
 
     /* 
-     * UI Map module - Google Maps APIs related
+     * UI Map submodule - Google Maps APIs related
      *
      */
-    ui.map = function () {
+    ui.map = ( function () {
 
         var mapDiv = document.createElement( 'div' );
         mapDiv.setAttribute( 'id', 'map' );
@@ -171,22 +189,39 @@ if ( window.businessLocator === undefined ) {
 
         function populateMarkers( map, locations ) {
 
-            var markerPath = 'marker-oe.png';
+            var markerPath = 'marker-oe.png';        
+            var infoWindow = null;
 
             $.each( locations, function( index, businessLocation ) {
 
-                var latLng = {
+                var latLng = new google.maps.LatLng( {
 
                     lat: businessLocation[ 'Latitude' ],
                     lng: businessLocation[ 'Longitude' ]
-                };
+                } );
 
-                new google.maps.Marker( {
+
+                var marker = new google.maps.Marker( {
 
                     position: latLng,
                     map: map,
                     icon: markerPath
 
+                } );
+
+                marker.addListener( 'click', function () {
+
+                    if ( infoWindow !== null ) {
+
+                        infoWindow.close();
+                    }
+
+                    infoWindow = new google.maps.InfoWindow( {
+
+                        content: businessLocation[ 'LocationTitle' ]
+                    } );
+
+                    infoWindow.open( map, marker );
                 } );
 
             } );
@@ -196,7 +231,7 @@ if ( window.businessLocator === undefined ) {
         function init() {
 
             var map = generateMap();
-            populateMarkers( map, businessLocator.locations );
+            populateMarkers( map, dummyLocations );
 
         }
 
@@ -206,29 +241,35 @@ if ( window.businessLocator === undefined ) {
             init: init
         };
 
-    };
+    } )();
+
 
     /* 
-     * Initilize all UI modules.
+     *  Build DOM elements into document
      *
      */
-    ui.init = function () {
+    ui.build = function () {
 
-        var uiDom = ui.dom();
-        var uiMap = ui.map();
+        var uiDom = this.ui.dom;
+        var uiMap = this.ui.map;
 
+        uiMap.init();
         uiDom.$container.append( uiDom.$buildSearchSection(), uiMap.container );
-
-        return {
-
-            dom: uiDom,
-            map: uiMap,
-            initMap: uiMap.init
-        };
-        
     };
 
-    function calculateDistance( geoCoords1, geoCoords2 ) {
+
+    /*
+     * Compute module container
+     *
+     */
+    var compute = {};
+
+
+    /*
+     * Calculate distance between two coordinates
+     *
+     */ 
+    compute.calculateDistance = function ( geoCoords1, geoCoords2 ) {
 
         var latLng1 = new google.maps.LatLng( geoCoords1 );
         var latLng2 = new google.maps.LatLng( geoCoords2 );
@@ -236,16 +277,18 @@ if ( window.businessLocator === undefined ) {
         var distance = google.maps.geometry.spherical.computeDistanceBetween( latLng1, latLng2 );
 
         return distance;
-    }
+    };
 
-    // var dist = calculateDistance( geoCoords1, geoCoords2 );
 
-    var uiModule = ui.init();
-
-    my.ui = uiModule;
+    /*
+     * START: Main
+     *
+     */
+    my.ui = ui;
+    my.compute = compute;
 
     // Create a shortcut
-    my.initMap = uiModule.initMap;
+    my.init = ui.build;
 
     return my;
 
