@@ -1,79 +1,10 @@
 /* 
- * Origin LPG business locator 
+ * Origin LPG business locator
+ * Requires IE9 and above
  * 
  * @requires jQuery
  *
  */
-var dummyLocations = [
-
-    {
-        "Type": "Vitalgas",
-        "LocationTitle": "Caltex Tempora",
-        "Address1": "109 Hoskins St",
-        "Suburb": "Temora",
-        "Postcode": 2666,
-        "Latitude": -34.44,
-        "Longitude": 147.53,
-        "ZoomLevel": 5,
-        "PhoneNumber": "02 6977 1265",
-        "Archived": 0,
-        "CreationDate": "1/4/14 16:16",
-        "CountryCode": "AU",
-        "StateRegion": "NSW",
-        "StateRegionFull": "New South Wales"
-    },
-
-    {
-        "type": "VitalGas",
-        "LocationTitle": "Ti Tree Roadhouse",
-        "Address1": "Stuart Highway",
-        "Suburb": "Ti Tree",
-        "Postcode": "872",
-        "Latitude": -21.38,
-        "Longitude": 133.93,
-        "ZoomLevel": "5",
-        "PhoneNumber": "08 8956 9741",
-        "Achieved": "0",
-        "CreationDate": "AU",
-        "StateRegion": "NT",
-        "StateRegionFull": "Northern Territory"
-    },
-
-    {
-        "Type": "Vitalgas",
-        "LocationTitle": "Walgett Retail Services",
-        "Address1": "21 Fox St",
-        "Suburb": "Walgett",
-        "Postcode": 2832,
-        "Latitude": -30.02,
-        "Longitude": 148.12,
-        "ZoomLevel": 5,
-        "PhoneNumber": "02 6828 1296",
-        "Archived": 0,
-        "CreationDate": "1/4/14 16:16",
-        "CountryCode": "AU",
-        "StateRegion": "NSW",
-        "StateRegionFull": "New South Wales"
-    },
-
-    {
-        "Type": "Vitalgas",
-        "LocationTitle": "A J Petroleum",
-        "Address1": "77 Benalla Rd",
-        "Suburb": "Shepparton",
-        "Postcode": 3630,
-        "Latitude": -36.38,
-        "Longitude": 145.42,
-        "ZoomLevel": 5,
-        "PhoneNumber": "03 58219977",
-        "Archived": 0,
-        "CreationDate": "1/4/14 16:16",
-        "CountryCode": "AU",
-        "StateRegion": "VIC",
-        "StateRegionFull": "Victoria"
-    }
-
-];
 
 function ModuleNotFoundError( moduleName ) {
 
@@ -95,11 +26,11 @@ if ( window.businessLocator === undefined ) {
     /* 
      * UI module container 
      * 
-     * ui - module ------ dom - submodule
-     *               |
-     *                --- map - submodule
-     *               |
-     *                --- build - method
+     * ui - module ------- dom - submodule
+     *                |
+     *                 --- map - submodule
+     *                |
+     *                 --- init - method
      *
      */
     var ui = {};
@@ -111,24 +42,25 @@ if ( window.businessLocator === undefined ) {
      */
     ui.dom = ( function () {
 
-        var $businessLocatorDiv = $( '#business-locator' );
+        var suburbTextInputId = 'search-by-suburb';
+        var stateSelectId = 'search-by-state';
+        var postcodeId = 'search-by-postcode';
 
         function $buildSearchSection() { 
 
             var $searchSectionDiv = $( '<div>', { 'id': 'search-section' } );
+            var $searchForm = $( '<form>', { 'id': 'search-form' } );
 
-            var suburbTextInputId = 'search-by-suburb';
             var $suburbLabel = $( '<label>', { 'for': suburbTextInputId, 'text': 'Suburb' } );
             var $suburbTextInput = $( '<input>', { 'id': suburbTextInputId, 
                                                    'name': suburbTextInputId, 
                                                    'type': 'text' } );
 
-            var stateSelectId = 'search-by-state';
             var $stateLabel = $( '<label>', { 'for': stateSelectId, 'text': 'State' } );
             var $stateSelect = $( '<select>', { 'id': stateSelectId, 'name': stateSelectId } );
             var stateLiterals = [ 'VIC', 'NSW', 'WA', 'SA', 'QLD', 'TAS', 'NT', 'ACT' ];
 
-            var postcodeId = 'search-by-postcode';
+
             var $postcodeLabel = $( '<label>', { 'for': postcodeId, 'text': 'Postcode' } );
             var $postcodeTextInput = $( '<input>', { 'id': postcodeId, 
                                                      'type': 'text', 
@@ -139,26 +71,77 @@ if ( window.businessLocator === undefined ) {
                                                  'name': searchButtonId, 
                                                  'text': 'Search' } );
 
-            $.each( stateLiterals, function ( index, stateAbbr ) {
+            stateLiterals.forEach( function ( stateAbbr ) {
 
-                var $stateOption = $( '<option>', { 'value': stateAbbr.toLowerCase(), 'text': stateAbbr } );
+                var $stateOption = $( '<option>', { 'value': stateAbbr, 'text': stateAbbr } );
                 $stateSelect.append( $stateOption );
 
             } );
 
-            return $searchSectionDiv.append( $suburbLabel, 
-                                             $suburbTextInput, 
-                                             $stateLabel,
-                                             $stateSelect,
-                                             $postcodeLabel,
-                                             $postcodeTextInput, 
-                                             $searchButton );
+            $searchForm.on( 'submit', function ( event ) {
+
+                event.preventDefault();
+
+                var searchContent = getSearchContent( $( this ) );
+                var coords = compute.getCoords( searchContent, handleGeocodingReponse );
+                
+            } );
+
+            $searchForm.append( $suburbLabel, 
+                                $suburbTextInput, 
+                                $stateLabel,
+                                $stateSelect,
+                                $postcodeLabel,
+                                $postcodeTextInput, 
+                                $searchButton );
+
+            return $searchSectionDiv.append( $searchForm );
         }
+
+        function handleGeocodingReponse( response ) {
+
+            var geoLocation = response[ 0 ];
+            var address = geoLocation.formatted_address;
+            var latLng = geoLocation.geometry.location;
+
+            console.log( 9, geoLocation.formatted_address );
+        }
+
+
+        function getSearchContent( $form ) {
+
+            var formNamesValues = $form.serializeArray();
+
+            var suburbContent = '';
+            var stateContent = '';
+            var postcodeContent = '';
+
+            formNamesValues.forEach( function( nameValue ) {
+
+                if ( nameValue.name === suburbTextInputId ) {
+
+                    suburbContent = nameValue.value.trim();
+                }
+                else if ( nameValue.name === stateSelectId ) {
+
+                    stateContent = nameValue.value.trim();
+                }
+                else if ( nameValue.name === postcodeId ) {
+
+                    postcodeContent = nameValue.value.trim();
+                }
+
+            } );
+
+            return ( suburbContent + ' ' + stateContent + ' ' + postcodeContent ).trim();
+
+        }
+
 
         return {
 
-            $container: $businessLocatorDiv,
-            $buildSearchSection: $buildSearchSection
+            $buildSearchSection: $buildSearchSection,
+            getSearchContent: getSearchContent
         };
 
     } )();
@@ -170,12 +153,12 @@ if ( window.businessLocator === undefined ) {
      */
     ui.map = ( function () {
 
+        var markerPath = 'marker-oe.png';   
         var mapDiv = document.createElement( 'div' );
 
         mapDiv.setAttribute( 'id', 'map' );
 
         var uluru = { lat: -25.363, lng: 131.044 };
-
 
         function generateMap( mapCenter) {
             
@@ -187,23 +170,16 @@ if ( window.businessLocator === undefined ) {
 
             var map = new google.maps.Map( mapDiv, mapOptions );
 
-            map.addListener( 'bounds_changed', function () {
-
-                map.setCenter( uluru );
-
-            } );
-
             return map;
 
         }
 
 
         function populateMarkers( map, locations ) {
-
-            var markerPath = 'marker-oe.png';        
+     
             var infoWindow = null;
 
-            $.each( locations, function( index, businessLocation ) {
+            locations.forEach( function( businessLocation ) {
 
                 var latLng = new google.maps.LatLng( {
 
@@ -237,10 +213,11 @@ if ( window.businessLocator === undefined ) {
             } );
         }
 
-        function init() {
+
+        function init( locations ) {
 
             var map = generateMap( uluru );
-            populateMarkers( map, dummyLocations );
+            populateMarkers( map, locations );
 
         }
 
@@ -256,14 +233,17 @@ if ( window.businessLocator === undefined ) {
     /* 
      *  Build DOM elements into document
      *
+     *  @param { string } elementId
      */
-    ui.init = function () {
+    ui.init = function ( elementId, locations ) {
 
         var uiDom = ui.dom;
         var uiMap = ui.map;
 
-        uiMap.init();
-        uiDom.$container.append( uiDom.$buildSearchSection(), uiMap.container );
+        var $businessLocatorDiv = $( '#' + elementId );
+        uiMap.init( locations );
+        
+        $businessLocatorDiv.append( uiDom.$buildSearchSection(), uiMap.container );
     };
 
 
@@ -275,7 +255,9 @@ if ( window.businessLocator === undefined ) {
 
         /*
          * Calculate distance between two coordinates
-         *
+         * 
+         * @param geoCoords1 - eg. { lat: -37.807977, lng: 144.969106 }
+         * @return - Direct distance NOT walking, driving or fly distances.
          */ 
         function calculateDistance( geoCoords1, geoCoords2 ) {
 
@@ -323,26 +305,47 @@ if ( window.businessLocator === undefined ) {
         }
 
         /*
+         * 
+         *
+         * @param { Object } coords - eg. { lat: 12, lng: 34 }
+         */
+        function sortByDistance( coords, locations ) {
+
+            locations.sort( function( location1, location2 ) { 
+
+                var latLng1 = { lat: location1[ 'Latitude'], lng: location1[ 'Longitude'] };
+                var latLng2 = { lat: location2[ 'Latitude'], lng: location2[ 'Longitude'] };
+
+                var distance1 = calculateDistance( coords, latLng1  );
+                var distance2 = calculateDistance( coords, latLng2  );
+
+                return distance1 - distance2;
+
+            } );
+
+        }
+
+        /*
          * Main in compute module
          *
          */
-        function init( ) {
+        function init() {
 
             function handleSuccess( results ) {
 
-                console.log( 1, results, status );
+                // console.log( 1, results, status );
 
             }
 
             // Test
-            getCoords( 'Melbourne', handleSuccess );
+            // getCoords( 'Melbourne', handleSuccess );
 
         }
-
 
         return {
 
             calculateDistance: calculateDistance,
+            sortByDistance: sortByDistance,
             getCoords: getCoords,
             init: init
 
@@ -360,7 +363,7 @@ if ( window.businessLocator === undefined ) {
 
     my.init = function () {
 
-        ui.init();
+        ui.init( 'business-locator', dummyLocations );
         compute.init();
     };
 

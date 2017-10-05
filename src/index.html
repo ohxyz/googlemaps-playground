@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <style>
     #map {
@@ -9,13 +8,14 @@
     }
     </style>
     <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
+    <link rel="icon" href="morty.png" />
 </head>
 
 <body>
-    <h2>Code Test</h2>
-    <div id="mocha"></div>
     <h2>UI Test</h2>
     <div id="business-locator"></div>
+    <h2>Code Test</h2>
+    <div id="mocha"></div>
 
     <!-- Dev scripts -->
     <script src="jquery.min.js"></script>
@@ -23,13 +23,14 @@
     <script src="business-locator-locations.js"></script>
     <script src="business-locator.js"></script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=businessLocator.init"></script>
+    <!-- UI test first. Load Google scripts and prepare for code test. -->
+    <script src="dummy-locations.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY&libraries=geometry&callback=businessLocator.init"></script>
 
-    <!-- Test scripts -->
-    <script src="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chai/4.1.2/chai.min.js"></script>
-
+    <!-- Code test. Require Google APIs -->
+    <script src="mocha.js"></script>
+    <script src="chai.js"></script>
     <script src="unit-test.js"></script>
+    
 </body>
-
 </html>
