@@ -2,7 +2,7 @@
  * Origin LPG business locator
  * Requires IE9 and above
  * 
- * @requires jQuery
+ * @requires jQuery, List.js - listjs.com
  *
  */
 
@@ -20,26 +20,34 @@ if ( window.businessLocator === undefined ) {
     window.businessLocator = {};
 }
 
+/*
+ * Module ------- ui ( module ) ------- dom ( module )
+ *           |                     |
+ *           |                      --- map ( module )
+ *           |                     |
+ *           |                      --- init ( method )
+ *           |
+ *           |
+ *            --- compute ( module )
+ *
+ * @summary UI module is on the top of Compute module
+ *          
+ */
 
 ( function ( my, $ ) {
 
     /* 
      * UI module container 
      * 
-     * ui - module ------- dom - submodule
-     *                |
-     *                 --- map - submodule
-     *                |
-     *                 --- init - method
-     *
      */
     var ui = {};
-
 
     /* 
      * UI DOM submodule
      *
      */
+    ui.locations = [];
+
     ui.dom = ( function () {
 
         var suburbTextInputId = 'search-by-suburb';
@@ -98,13 +106,28 @@ if ( window.businessLocator === undefined ) {
             return $searchSectionDiv.append( $searchForm );
         }
 
+
+        function $buildSearchResultsSection( locations ) {
+
+            console.log( 3, locations );
+        }
+
+
         function handleGeocodingReponse( response ) {
 
-            var geoLocation = response[ 0 ];
-            var address = geoLocation.formatted_address;
-            var latLng = geoLocation.geometry.location;
+            var locationInfo = response[ 0 ];
+            var address = locationInfo.formatted_address;
 
-            console.log( 9, geoLocation.formatted_address );
+            var geoLocation = locationInfo.geometry.location
+            var latLng = {
+
+                lat: geoLocation.lat(), 
+                lng: geoLocation.lng() 
+            } ;
+
+            compute.sortByDistance( latLng, ui.locations );
+            $buildSearchResultsSection( ui.locations );
+
         }
 
 
@@ -141,6 +164,7 @@ if ( window.businessLocator === undefined ) {
         return {
 
             $buildSearchSection: $buildSearchSection,
+            $buildSearchResultsSection: $buildSearchResultsSection,
             getSearchContent: getSearchContent
         };
 
@@ -153,12 +177,12 @@ if ( window.businessLocator === undefined ) {
      */
     ui.map = ( function () {
 
-        var markerPath = 'marker-oe.png';   
-        var mapDiv = document.createElement( 'div' );
+        var markerPath = 'marker-oe.png';
+        var uluru = { lat: -25.363, lng: 131.044 };
 
+        var mapDiv = document.createElement( 'div' );
         mapDiv.setAttribute( 'id', 'map' );
 
-        var uluru = { lat: -25.363, lng: 131.044 };
 
         function generateMap( mapCenter) {
             
@@ -221,6 +245,7 @@ if ( window.businessLocator === undefined ) {
 
         }
 
+
         return {
 
             container: mapDiv,
@@ -242,7 +267,8 @@ if ( window.businessLocator === undefined ) {
 
         var $businessLocatorDiv = $( '#' + elementId );
         uiMap.init( locations );
-        
+
+        this.locations = locations;        
         $businessLocatorDiv.append( uiDom.$buildSearchSection(), uiMap.container );
     };
 
@@ -326,19 +352,11 @@ if ( window.businessLocator === undefined ) {
         }
 
         /*
-         * Main in compute module
+         * Compute module init method
          *
          */
         function init() {
 
-            function handleSuccess( results ) {
-
-                // console.log( 1, results, status );
-
-            }
-
-            // Test
-            // getCoords( 'Melbourne', handleSuccess );
 
         }
 
@@ -362,7 +380,7 @@ if ( window.businessLocator === undefined ) {
     my.compute = compute;
 
     my.init = function () {
-
+        
         ui.init( 'business-locator', dummyLocations );
         compute.init();
     };

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+
+    #example-list {
+
+        background-color: #eeeeee;
+
+
+    }
+
+        #example-list .list {
+
+            margin: 0;
+            padding: 0;
+        }
+
+        #example-list .list li:nth-child(even) {
+
+            background-color: yellow;
+        }
+
+        #example-list .list-header{
+
+            background-color: #a71932;
+            color: white;
+        }
+
+            #example-list .list span {
+
+                display: inline-block;
+            }
+
+            #example-list .LocationTitle {
+
+                width: 20%;
+            }
+
+            #example-list .Address1 {
+
+            }
+
+
+
+        .pagination li {
+
+            display: inline-block;
+            padding: 8px;
+        }
+
+    </style>
+    
+    <link rel="icon" href="morty.png" />
+    <script src="list.min.js"></script>
+    <script src="business-locator-locations.js"></script>
+    <script src="dummy-locations.js"></script>
+</head>
+
+<body>
+    <div id="example-list">
+        <ul class="list">
+            <li class="list-header">
+                <span class="LocationTitle">Name</span>
+                <span class="Address1">Address</span>
+            </li>
+        </ul>
+        <ul class="pagination"></ul>
+    </div>
+
+    <script>
+        var options = {
+
+            valueNames: [ 'LocationTitle', 'Address1' ],
+
+            item: '<li><span class="LocationTitle"></span><span class="Address1"></span></li>',
+
+            page: 6,
+
+            pagination: {
+
+                innerWindow: 1,
+
+                outerWindow: 2,
+
+            }
+            
+        };
+
+        var userList = new List( 'example-list', options, businessLocator.locations );
+
+    </script>
+</body>
+</html>
