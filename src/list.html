@@ -2,93 +2,57 @@
 <html>
 <head>
     <style>
-
-    #example-list {
-
-        background-color: #eeeeee;
-
-
+    #map {
+        height: 400px;
+        width: 100%;
     }
 
-        #example-list .list {
+    ul {
 
-            margin: 0;
-            padding: 0;
-        }
+        margin: 0;
+        padding: 0;
+    }
 
-        #example-list .list li:nth-child(even) {
+    li {
 
-            background-color: yellow;
-        }
+        display: block;
+    }
 
-        #example-list .list-header{
+    span {
 
-            background-color: #a71932;
-            color: white;
-        }
+        display: inline-block;
+    }
 
-            #example-list .list span {
+    .LocationTitle {
 
-                display: inline-block;
-            }
+        width: 40% ;
+    }
 
-            #example-list .LocationTitle {
-
-                width: 20%;
-            }
-
-            #example-list .Address1 {
-
-            }
-
-
-
-        .pagination li {
-
-            display: inline-block;
-            padding: 8px;
-        }
 
     </style>
-    
     <link rel="icon" href="morty.png" />
-    <script src="list.min.js"></script>
-    <script src="business-locator-locations.js"></script>
-    <script src="dummy-locations.js"></script>
 </head>
 
 <body>
-    <div id="example-list">
-        <ul class="list">
-            <li class="list-header">
-                <span class="LocationTitle">Name</span>
-                <span class="Address1">Address</span>
-            </li>
-        </ul>
-        <ul class="pagination"></ul>
-    </div>
+    <h2>List Test</h2>
+    <div id="list-test"></div>
 
+    <script src="jquery.min.js"></script>
+    <script src="business-locator.js"></script>
+    <script src="dummy-locations.js"></script>
     <script>
-        var options = {
 
-            valueNames: [ 'LocationTitle', 'Address1' ],
+        var listOptions = {
 
-            item: '<li><span class="LocationTitle"></span><span class="Address1"></span></li>',
+            items: dummyLocations,
 
-            page: 6,
-
-            pagination: {
-
-                innerWindow: 1,
-
-                outerWindow: 2,
-
-            }
-            
+            listItemFields: [ 'LocationTitle', 'Address1' ]
         };
 
-        var userList = new List( 'example-list', options, businessLocator.locations );
+        $list = businessLocator.ui.dom.$buildList( listOptions );
 
+        $( '#list-test' ).append( $list );
     </script>
+    
 </body>
 </html>

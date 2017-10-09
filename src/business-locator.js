@@ -34,7 +34,7 @@ if ( window.businessLocator === undefined ) {
  *          
  */
 
-( function ( my, $ ) {
+( function ( module, $ ) {
 
     /* 
      * UI module container 
@@ -56,7 +56,7 @@ if ( window.businessLocator === undefined ) {
 
         function $buildSearchSection() { 
 
-            var $searchSectionDiv = $( '<div>', { 'id': 'search-section' } );
+            var $containerDiv = $( '<div>', { 'id': 'search-section' } );
             var $searchForm = $( '<form>', { 'id': 'search-form' } );
 
             var $suburbLabel = $( '<label>', { 'for': suburbTextInputId, 'text': 'Suburb' } );
@@ -103,13 +103,107 @@ if ( window.businessLocator === undefined ) {
                                 $postcodeTextInput, 
                                 $searchButton );
 
-            return $searchSectionDiv.append( $searchForm );
+            return $containerDiv.append( $searchForm );
         }
 
 
         function $buildSearchResultsSection( locations ) {
 
-            console.log( 3, locations );
+            var $containerDiv = $( '<div>', { 'id': 'search-results-section' } );
+
+            var $listUl = $buildList();
+            var $paginationUl = $buildPagination();
+
+            // $containerDiv.append( $listUl, $paginationUl );
+            $containerDiv.append( $paginationUl );
+
+            return $containerDiv;
+
+        }
+
+        function $buildList( options ) {
+
+            var settings = $.extend( {
+
+                items: [],
+
+                listItemClassName: 'list-item',
+
+                listItemFields: []
+
+
+            }, options );
+
+            $containerUl = $( '<ul>', { 'class': 'list' } );
+
+            settings.items.forEach( function ( item ) {
+
+                $listItem = $buildListItem( settings.listItemFields, item );
+
+                $containerUl.append( $listItem );
+
+            } );
+
+            return $containerUl;
+            
+        }
+
+
+        function $buildListItem( props, object ) {
+
+            var $li = $( '<li>' );
+
+            props.forEach( function ( prop ) {
+
+                var $span = $( '<span>', { 
+
+                    'class': prop,
+
+                    'text': object[ prop ]
+
+                } );
+
+                $li.append( $span );
+
+            } );
+
+            return $li;
+        }
+
+
+        function $buildPagination( options ) {
+
+            var settings = $.extend( {
+
+                querySelector: '.list-item',
+
+                numberPerPage: 5
+            
+            }, options );
+
+            var $containerUl = $( '<ul>', { 'class': 'pagination' } );
+
+            var $prevLi = $( '<li>', { 'class': 'prev', 'text': '&lt;' } );
+            var $nextLi = $( '<li>', { 'class': 'next', 'text': '&gt;' } );
+            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'text': '&lt;&lt;' } );
+            var $nextNLi = $( '<li>', { 'class': 'next-n', 'text': '&gt;&gt;' } );
+            var $pageLi; 
+
+            var $listItems = $( settings.querySelector );
+
+            var count = $listItems.length;
+            var totalPages = Math.ceil( count / settings.numberPerPage );
+
+            $containerUl.append( $prevLi, $prevNLi)
+
+            for ( var i = 1; i <= totalPages; i ++ ) {
+
+                $pageLi = $( '<li>', { 'class': 'page', 'text': i } );
+                $containerUl.append( $pageLi );
+            }
+
+            $containerUl.append( $nextNLi, $nextLi );
+
         }
 
 
@@ -163,8 +257,11 @@ if ( window.businessLocator === undefined ) {
 
         return {
 
+            $buildList: $buildList,
+            $buildPagination: $buildPagination,
             $buildSearchSection: $buildSearchSection,
             $buildSearchResultsSection: $buildSearchResultsSection,
+            $buildPagination: $buildPagination,
             getSearchContent: getSearchContent
         };
 
@@ -376,16 +473,16 @@ if ( window.businessLocator === undefined ) {
      * Main
      *
      */
-    my.ui = ui;
-    my.compute = compute;
+    module.ui = ui;
+    module.compute = compute;
 
-    my.init = function () {
+    module.init = function () {
         
         ui.init( 'business-locator', dummyLocations );
         compute.init();
     };
 
-    return my;
+    return module;
 
 } )( window.businessLocator, jQuery );
 
