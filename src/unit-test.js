@@ -73,7 +73,7 @@ describe( 'Compute module', function () {
     var sydney = { lat: -33.860625, lng: 151.204862 };
 
 
-    // How to measue distance: https://support.google.com/maps/answer/1628031?co=GENIE.Platform%3DDesktop&hl=en&oco=1
+    // How to measure distance: https://support.google.com/maps/answer/1628031?co=GENIE.Platform%3DDesktop&hl=en&oco=1
     describe( 'Method: calulateDistance', function () {
 
         it( 'should be about 713km from Melbourne to Sydney', function () { 

@@ -1,8 +1,8 @@
 /* 
  * Origin LPG business locator
- * Requires IE9 and above
+ * Requires IE9 or above
  * 
- * @requires jQuery, List.js - listjs.com
+ * @requires jQuery
  *
  */
 
@@ -107,17 +107,101 @@ if ( window.businessLocator === undefined ) {
         }
 
 
-        function $buildSearchResultsSection( locations ) {
+        function $buildListWithPagination( options ) {
 
-            var $containerDiv = $( '<div>', { 'id': 'search-results-section' } );
+            var settings = $.extend( {
 
-            var $listUl = $buildList();
-            var $paginationUl = $buildPagination();
+                items: [],
 
-            // $containerDiv.append( $listUl, $paginationUl );
-            $containerDiv.append( $paginationUl );
+                listItemClassName: 'list-item',
 
-            return $containerDiv;
+                listHeaderClassName: 'list-header',
+
+                listItemFields: [],
+
+                listHeaderContent: {},
+
+                numberPerPage: 5
+
+            }, options );
+
+            var $containerDiv = $( '<div>' );
+            var $list = null;
+
+            var onUpdate = function ( pageNumber ) {
+
+                if ( $list !== null ) {
+
+                    $list.remove();
+                }
+
+                var start = ( pageNumber - 1 ) * settings.numberPerPage;
+                var end = pageNumber * settings.numberPerPage;
+                var items = settings.items.slice( start, end );
+
+                var listOptions = {
+
+                    items: items,
+
+                    listItemFields: settings.listItemFields,
+
+                    listHeaderContent: settings.listHeaderContent,
+
+                };
+
+                $list = $buildList( listOptions );
+                $containerDiv.prepend( $list );
+
+            }
+
+            var paginationOptions = {
+
+                numberInTotal: settings.items.length,
+
+                numberPerPage: settings.numberPerPage,
+
+                onUpdate: onUpdate
+
+            };
+
+            var $pager = $buildPagination( paginationOptions );
+
+            onUpdate( 1 );
+
+            return $containerDiv.append( $pager );
+
+        }
+
+
+        function $buildListHeader( options ) {
+
+            var settings = $.extend( {
+
+                className: 'list-header',
+
+                fields: [],
+
+                content: {}
+
+            }, options );
+
+            var $listHeaderLi = $( '<li>', { 'class': settings.className } );
+
+            settings.fields.forEach( function ( fieldName ) {
+
+                var $span = $( '<span>', {
+
+                    'class': fieldName,
+
+                    'text': settings.content[ fieldName ]
+
+                } );
+
+                $listHeaderLi.append( $span );
+
+            } );
+
+            return $listHeaderLi;
 
         }
 
@@ -129,18 +213,29 @@ if ( window.businessLocator === undefined ) {
 
                 listItemClassName: 'list-item',
 
-                listItemFields: []
+                listItemFields: [],
 
+                listHeaderContent: {}
 
             }, options );
 
-            $containerUl = $( '<ul>', { 'class': 'list' } );
+            var $containerUl = $( '<ul>', { 'class': 'list' } );
+
+            var $listHeaderLi = $buildListHeader( {
+
+                fields: settings.listItemFields, 
+
+                content: settings.listHeaderContent 
+                
+            } );
+
+            $containerUl.append( $listHeaderLi );
 
             settings.items.forEach( function ( item ) {
 
                 $listItem = $buildListItem( settings.listItemFields, item );
 
-                $containerUl.append( $listItem );
+                $containerUl.append( $listItem.addClass( settings.listItemClassName ) );
 
             } );
 
@@ -175,34 +270,78 @@ if ( window.businessLocator === undefined ) {
 
             var settings = $.extend( {
 
-                querySelector: '.list-item',
+                numberInTotal: 0,
 
-                numberPerPage: 5
-            
+                numberPerPage: 5,
+
+                disabledClassName: 'disabled',
+
+                onUpdate: function() {}
+
             }, options );
+
+            var currentPage = 1;
+            var totalPages = Math.ceil( settings.numberInTotal / settings.numberPerPage );
 
             var $containerUl = $( '<ul>', { 'class': 'pagination' } );
 
-            var $prevLi = $( '<li>', { 'class': 'prev', 'text': '&lt;' } );
-            var $nextLi = $( '<li>', { 'class': 'next', 'text': '&gt;' } );
-            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'text': '&lt;&lt;' } );
-            var $nextNLi = $( '<li>', { 'class': 'next-n', 'text': '&gt;&gt;' } );
-            var $pageLi; 
+            var $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
+            var $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
+            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
+            var $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
+            var $pageLi;
 
-            var $listItems = $( settings.querySelector );
+            $containerUl.append( $prevLi, $prevNLi);
 
-            var count = $listItems.length;
-            var totalPages = Math.ceil( count / settings.numberPerPage );
-
-            $containerUl.append( $prevLi, $prevNLi)
+            var propName = 'pageNumber';
 
             for ( var i = 1; i <= totalPages; i ++ ) {
 
-                $pageLi = $( '<li>', { 'class': 'page', 'text': i } );
+                $pageLi = $( '<li>', { 'class': 'page', 'text': i } ).data( propName, i );
+
                 $containerUl.append( $pageLi );
             }
 
-            $containerUl.append( $nextNLi, $nextLi );
+            $containerUl.on( 'click', function ( event ) { 
+
+                var $target = $( event.target );
+
+                console.log( 1, $target );
+
+                var pageNumber = $target.data( propName );
+
+                currentPage = pageNumber;
+
+                setDisabled();
+
+                settings.onUpdate( pageNumber );
+
+            } );
+
+            function setDisabled() {
+
+                if ( currentPage === 1 ) {
+
+                    $prevLi.addClass( settings.disabledClassName );
+                    $nextLi.removeClass( settings.disabledClassName );
+
+                }
+                else if ( currentPage === totalPages ) {
+
+                    $nextLi.addClass( settings.disabledClassName );
+                    $prevLi.removeClass( settings.disabledClassName );
+                }
+                else {
+
+                    $prevLi.removeClass( settings.disabledClassName );
+                    $nextLi.removeClass( settings.disabledClassName );
+                }
+
+            }
+
+            setDisabled();
+
+            return $containerUl.append( $nextNLi, $nextLi );
 
         }
 
@@ -259,9 +398,8 @@ if ( window.businessLocator === undefined ) {
 
             $buildList: $buildList,
             $buildPagination: $buildPagination,
+            $buildListWithPagination: $buildListWithPagination,
             $buildSearchSection: $buildSearchSection,
-            $buildSearchResultsSection: $buildSearchResultsSection,
-            $buildPagination: $buildPagination,
             getSearchContent: getSearchContent
         };
 

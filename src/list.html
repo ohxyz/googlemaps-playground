@@ -2,10 +2,6 @@
 <html>
 <head>
     <style>
-    #map {
-        height: 400px;
-        width: 100%;
-    }
 
     ul {
 
@@ -23,9 +19,29 @@
         display: inline-block;
     }
 
+    .list-header {
+
+        background: red;
+
+    }
+
     .LocationTitle {
 
         width: 40% ;
+    }
+
+    .pagination li {
+
+        display: inline-block;
+        cursor: pointer;
+        padding: 4px;
+
+    }
+
+    .pagination .disabled {
+
+        cursor: not-allowed;
+        color: #eeeeee;
     }
 
 
@@ -46,10 +62,12 @@
 
             items: dummyLocations,
 
-            listItemFields: [ 'LocationTitle', 'Address1' ]
+            listItemFields: [ 'LocationTitle', 'Address1' ],
+
+            listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' }
         };
 
-        $list = businessLocator.ui.dom.$buildList( listOptions );
+        $list = businessLocator.ui.dom.$buildListWithPagination( listOptions );
 
         $( '#list-test' ).append( $list );
     </script>
