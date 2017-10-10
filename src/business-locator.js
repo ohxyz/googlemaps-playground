@@ -6,13 +6,6 @@
  *
  */
 
-function ModuleNotFoundError( moduleName ) {
-
-    this.message = 'Require module: ' + moduleName + '.';
-    this.name = 'ModuleNotFound';
-}
-
-
 /* START: businessLocator module */
 
 if ( window.businessLocator === undefined ) {
@@ -21,7 +14,9 @@ if ( window.businessLocator === undefined ) {
 }
 
 /*
- * Module ------- ui ( module ) ------- dom ( module )
+ * Module ------- ui ( module ) ------- component( module )
+ *           |                     |
+ *           |                      --- dom ( module )
  *           |                     |
  *           |                      --- map ( module )
  *           |                     |
@@ -29,6 +24,7 @@ if ( window.businessLocator === undefined ) {
  *           |
  *           |
  *            --- compute ( module )
+ *
  *
  * @summary UI module is on the top of Compute module
  *          
@@ -42,12 +38,176 @@ if ( window.businessLocator === undefined ) {
      */
     var ui = {};
 
+    ui.locations = [];
+
+    ui.component = {};
+
+    /*
+     * Pagination component, can be an independ UI component
+     * 
+     * @requires jQuery
+     */
+    ui.component.pagination = ( function ( $ ) {
+
+        function $createPagination( options ) {
+
+            var settings = $.extend( {
+
+                numberInTotal: 0,
+
+                numberPerPage: 5,
+
+                disabledClassName: 'disabled',
+
+                activeClassName: 'active',
+
+                pageNumberClassName: 'page-number',
+
+                onNumberClick: function() {}
+
+            }, options );
+
+            var currentPage = 1;
+            var pagesInTotal = Math.ceil( settings.numberInTotal / settings.numberPerPage );
+
+            var $containerUl = $( '<ul>', { 'class': 'pagination' } );
+
+            var $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
+            var $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
+            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
+            var $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
+
+            var $firstPageNumberLi = null;
+            var $pageNumberLi = null;
+            var pageNumberLis = [];
+
+            $containerUl.append( $prevLi, $prevNLi);
+
+            var propName = 'pageNumber';
+
+            for ( var i = 1; i <= pagesInTotal; i ++ ) {
+
+                $pageNumberLi = $( '<li>', { 'class': settings.pageNumberClassName, 'text': i } ).data( propName, i );
+
+                if ( i === 1 ) {
+
+                    $firstPageNumberLi = $pageNumberLi;
+                }
+
+                pageNumberLis.push( $pageNumberLi );
+                $containerUl.append( $pageNumberLi );
+            }
+
+            $containerUl.on( 'click', function ( event ) {
+
+                if ( event.target === event.currentTarget ) {
+
+                    return;
+                }
+
+                var $target = $( event.target );
+
+                handleClick( $target );
+            } );
+
+
+            function handleClick( $element ) {
+
+                //console.log( 1, $element  );
+
+                if ( $element.hasClass( settings.pageNumberClassName ) === true ) {
+
+                    currentPage = $element.data( propName );
+
+                }
+                else if( $element.is( $prevLi ) ) {
+
+                    if ( currentPage <= 1 ) {
+
+                        return;
+                    }
+
+                    currentPage --;
+
+                }
+                else if ( $element.is( $nextLi ) ) {
+
+                    if ( currentPage >= pagesInTotal ) {
+
+                        return ;
+                    }
+
+                    currentPage ++;
+                }
+
+
+                settings.onNumberClick( currentPage );
+                setDisabled();
+                setActive();
+            }
+
+
+            function setActive() {
+
+                pageNumberLis.forEach( function( $pageNumberLi ) {
+
+                    if ( $pageNumberLi.data( propName ) === currentPage ) {
+
+                        $pageNumberLi.addClass( settings.activeClassName );
+                    }
+                    else {
+
+                        $pageNumberLi.removeClass( settings.activeClassName );
+                    }
+
+                } );
+            }
+
+            function setDisabled() {
+
+                if ( currentPage === 1 ) {
+
+                    $prevLi.addClass( settings.disabledClassName );
+                    $nextLi.removeClass( settings.disabledClassName );
+
+                }
+                else if ( currentPage === pagesInTotal ) {
+
+                    $nextLi.addClass( settings.disabledClassName );
+                    $prevLi.removeClass( settings.disabledClassName );
+                }
+                else {
+
+                    $prevLi.removeClass( settings.disabledClassName );
+                    $nextLi.removeClass( settings.disabledClassName );
+                }
+
+            }
+
+            function init() {
+
+                setActive( $firstPageNumberLi );
+                setDisabled();
+            }
+
+            init();
+
+            return $containerUl.append( $nextNLi, $nextLi );
+
+        }
+
+        return {
+
+            $createPagination: $createPagination
+        };
+
+    } )( jQuery );
+
+    
     /* 
      * UI DOM submodule
      *
      */
-    ui.locations = [];
-
     ui.dom = ( function () {
 
         var suburbTextInputId = 'search-by-suburb';
@@ -128,7 +288,7 @@ if ( window.businessLocator === undefined ) {
             var $containerDiv = $( '<div>' );
             var $list = null;
 
-            var onUpdate = function ( pageNumber ) {
+            var onNumberClick = function ( pageNumber ) {
 
                 if ( $list !== null ) {
 
@@ -160,13 +320,13 @@ if ( window.businessLocator === undefined ) {
 
                 numberPerPage: settings.numberPerPage,
 
-                onUpdate: onUpdate
+                onNumberClick: onNumberClick
 
             };
 
-            var $pager = $buildPagination( paginationOptions );
+            var $pager = ui.component.pagination.$createPagination( paginationOptions );
 
-            onUpdate( 1 );
+            onNumberClick( 1 );
 
             return $containerDiv.append( $pager );
 
@@ -266,86 +426,6 @@ if ( window.businessLocator === undefined ) {
         }
 
 
-        function $buildPagination( options ) {
-
-            var settings = $.extend( {
-
-                numberInTotal: 0,
-
-                numberPerPage: 5,
-
-                disabledClassName: 'disabled',
-
-                onUpdate: function() {}
-
-            }, options );
-
-            var currentPage = 1;
-            var totalPages = Math.ceil( settings.numberInTotal / settings.numberPerPage );
-
-            var $containerUl = $( '<ul>', { 'class': 'pagination' } );
-
-            var $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
-            var $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
-            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
-            var $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
-            var $pageLi;
-
-            $containerUl.append( $prevLi, $prevNLi);
-
-            var propName = 'pageNumber';
-
-            for ( var i = 1; i <= totalPages; i ++ ) {
-
-                $pageLi = $( '<li>', { 'class': 'page', 'text': i } ).data( propName, i );
-
-                $containerUl.append( $pageLi );
-            }
-
-            $containerUl.on( 'click', function ( event ) { 
-
-                var $target = $( event.target );
-
-                console.log( 1, $target );
-
-                var pageNumber = $target.data( propName );
-
-                currentPage = pageNumber;
-
-                setDisabled();
-
-                settings.onUpdate( pageNumber );
-
-            } );
-
-            function setDisabled() {
-
-                if ( currentPage === 1 ) {
-
-                    $prevLi.addClass( settings.disabledClassName );
-                    $nextLi.removeClass( settings.disabledClassName );
-
-                }
-                else if ( currentPage === totalPages ) {
-
-                    $nextLi.addClass( settings.disabledClassName );
-                    $prevLi.removeClass( settings.disabledClassName );
-                }
-                else {
-
-                    $prevLi.removeClass( settings.disabledClassName );
-                    $nextLi.removeClass( settings.disabledClassName );
-                }
-
-            }
-
-            setDisabled();
-
-            return $containerUl.append( $nextNLi, $nextLi );
-
-        }
-
-
         function handleGeocodingReponse( response ) {
 
             var locationInfo = response[ 0 ];
@@ -397,7 +477,6 @@ if ( window.businessLocator === undefined ) {
         return {
 
             $buildList: $buildList,
-            $buildPagination: $buildPagination,
             $buildListWithPagination: $buildListWithPagination,
             $buildSearchSection: $buildSearchSection,
             getSearchContent: getSearchContent
@@ -499,7 +578,7 @@ if ( window.businessLocator === undefined ) {
 
         var uiDom = ui.dom;
         var uiMap = ui.map;
-
+ 
         var $businessLocatorDiv = $( '#' + elementId );
         uiMap.init( locations );
 

@@ -34,14 +34,21 @@
 
         display: inline-block;
         cursor: pointer;
-        padding: 4px;
+        padding: 8px;
+        margin: 8px;
+        background: #eeeeee;
 
+    }
+
+    .pagination .active {
+
+        background-color: green;
     }
 
     .pagination .disabled {
 
         cursor: not-allowed;
-        color: #eeeeee;
+        color: #cccccc;
     }
 
 
@@ -64,7 +71,9 @@
 
             listItemFields: [ 'LocationTitle', 'Address1' ],
 
-            listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' }
+            listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' },
+
+            numberPerPage: 7
         };
 
         $list = businessLocator.ui.dom.$buildListWithPagination( listOptions );
