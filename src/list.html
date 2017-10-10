@@ -30,10 +30,16 @@
         width: 40% ;
     }
 
+    .pagination {
+
+        cursor: pointer;
+    }
+
+
     .pagination li {
 
         display: inline-block;
-        cursor: pointer;
+        user-select: none;
         padding: 8px;
         margin: 8px;
         background: #eeeeee;
@@ -61,19 +67,32 @@
     <div id="list-test"></div>
 
     <script src="jquery.min.js"></script>
+    <script src="business-locator-locations.js"></script>
     <script src="business-locator.js"></script>
     <script src="dummy-locations.js"></script>
     <script>
 
+        var dummy = new Array( 401 ).fill( null );
+
+        dummy.map( function ( item, index, array ) {
+
+            array[ index ] = {
+
+                'LocationTitle': 'Title ' + ( index + 1 ),
+                'Address1': 'Address ' + ( index + 1 ),
+            }
+
+        } );
+
         var listOptions = {
 
-            items: dummyLocations,
+            // dummyLocations, businessLocator.locations, ...
+            items: dummy,
 
             listItemFields: [ 'LocationTitle', 'Address1' ],
 
             listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' },
 
-            numberPerPage: 7
         };
 
         $list = businessLocator.ui.dom.$buildListWithPagination( listOptions );

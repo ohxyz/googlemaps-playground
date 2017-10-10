@@ -1,6 +1,6 @@
 /* 
  * Origin LPG business locator
- * Requires IE9 or above
+ * Requires IE9+
  * 
  * @requires jQuery
  *
@@ -43,7 +43,7 @@ if ( window.businessLocator === undefined ) {
     ui.component = {};
 
     /*
-     * Pagination component, can be an independ UI component
+     * Pagination component, can be an independent UI component
      * 
      * @requires jQuery
      */
@@ -53,9 +53,11 @@ if ( window.businessLocator === undefined ) {
 
             var settings = $.extend( {
 
-                numberInTotal: 0,
+                numOfItemsInTotal: 0,
 
-                numberPerPage: 5,
+                numOfItemsPerPage: 10,
+
+                numOfPagesInPageGroup: 11,
 
                 disabledClassName: 'disabled',
 
@@ -68,56 +70,123 @@ if ( window.businessLocator === undefined ) {
             }, options );
 
             var currentPage = 1;
-            var pagesInTotal = Math.ceil( settings.numberInTotal / settings.numberPerPage );
+            var currentPageGroup = 1;
+            var numOfPagesInTotal = Math.ceil( settings.numOfItemsInTotal / settings.numOfItemsPerPage );
+            var numOfPageGroupsInTotal = Math.ceil( numOfPagesInTotal / settings.numOfPagesInPageGroup );
 
-            var $containerUl = $( '<ul>', { 'class': 'pagination' } );
-
-            var $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
-            var $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
-            var $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
-            var $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
+            var $containerUl = null;
+            var $prevLi = null;
+            var $nextLi = null;
+            var $prevNLi = null;
+            var $nextNLi = null;
 
             var $firstPageNumberLi = null;
             var $pageNumberLi = null;
             var pageNumberLis = [];
 
-            $containerUl.append( $prevLi, $prevNLi);
-
             var propName = 'pageNumber';
 
-            for ( var i = 1; i <= pagesInTotal; i ++ ) {
+            init( currentPage );
 
-                $pageNumberLi = $( '<li>', { 'class': settings.pageNumberClassName, 'text': i } ).data( propName, i );
+            function init( pageGroupNumber ) {
 
-                if ( i === 1 ) {
+                var pageNumer = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + 1;
 
-                    $firstPageNumberLi = $pageNumberLi;
-                }
+                renderPagination( pageGroupNumber );
+                settings.onNumberClick( pageNumer )
 
-                pageNumberLis.push( $pageNumberLi );
-                $containerUl.append( $pageNumberLi );
+                setActive( $firstPageNumberLi );
+                setDisabled();
             }
 
-            $containerUl.on( 'click', function ( event ) {
 
-                if ( event.target === event.currentTarget ) {
+            function reRenderPagination( pageGroupNumber, pageActivated ) {
+
+                var $containerParent = $containerUl.parent();
+
+                renderPagination( pageGroupNumber, pageActivated );
+                $containerParent.append( $containerUl );
+            }
+
+
+            /*
+             *
+             * @param { number } - pageActivated is from 1 to settings.numOfPagesInPageGroup
+             */
+            function renderPagination( pageGroupNumber, pageActivated ) {
+
+                if ( $containerUl !== null && $containerUl.length >= 1 ) {
+
+                    $containerUl.remove();
+                }
+
+                var pageActivated = pageActivated === undefined ? 1 : pageActivated;
+
+                currentPage = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + pageActivated;
+
+                $containerUl = $( '<ul>', { 'class': 'pagination' } );
+
+                $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
+                $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
+                $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
+                $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
+
+                $containerUl.append( $prevNLi, $prevLi );
+                renderPageGroup( pageGroupNumber, $containerUl );
+                $containerUl.append( $nextLi, $nextNLi );
+
+                $containerUl.on( 'click', function ( event ) {
+
+                    if ( event.target === event.currentTarget ) {
+
+                        return;
+                    }
+
+                    var $target = $( event.target );
+
+                    handleClick( $target );
+
+                } );
+            }
+
+
+            function renderPageGroup( pageGroupNumber, $container ) {
+
+                if ( pageGroupNumber < 1 || pageGroupNumber > numOfPageGroupsInTotal ) {
 
                     return;
                 }
 
-                var $target = $( event.target );
+                var $pageNumberLi = null;
+                var pageNumber = 0;
+                var pageGroupIndex = pageGroupNumber - 1;
 
-                handleClick( $target );
-            } );
+                for ( var i = 1; i <= settings.numOfPagesInPageGroup; i ++ ) {
+
+                    pageNumber = pageGroupIndex * settings.numOfPagesInPageGroup + i;
+
+                    if ( pageNumber > numOfPagesInTotal ) {
+
+                        return;
+                    }
+
+                    $pageNumberLi = $( '<li>', { 'class': settings.pageNumberClassName, 'text': pageNumber } )
+                    $pageNumberLi.data( propName, pageNumber );
+
+                    $container.append( $pageNumberLi );
+                    pageNumberLis.push( $pageNumberLi );
+                }
+
+            }
 
 
             function handleClick( $element ) {
 
-                //console.log( 1, $element  );
-
                 if ( $element.hasClass( settings.pageNumberClassName ) === true ) {
 
                     currentPage = $element.data( propName );
+
+                    console.log( 'c', currentPage );
 
                 }
                 else if( $element.is( $prevLi ) ) {
@@ -129,15 +198,51 @@ if ( window.businessLocator === undefined ) {
 
                     currentPage --;
 
+                    if ( currentPage <= ( currentPageGroup - 1 ) * settings.numOfPagesInPageGroup ) {
+
+                        currentPageGroup --;
+                        reRenderPagination( currentPageGroup, settings.numOfPagesInPageGroup );
+                    }
+
                 }
                 else if ( $element.is( $nextLi ) ) {
 
-                    if ( currentPage >= pagesInTotal ) {
+                    if ( currentPage >= numOfPagesInTotal ) {
 
                         return ;
                     }
 
                     currentPage ++;
+
+                    if ( currentPage > currentPageGroup * settings.numOfPagesInPageGroup ) {
+
+                        currentPageGroup ++;
+                        reRenderPagination( currentPageGroup );
+                    }
+                }
+                else if ( $element.is( $prevNLi ) ){
+
+                    if ( currentPageGroup <= 1 ) {
+
+                        return;
+                    }
+
+                    currentPageGroup --;
+
+                    reRenderPagination( currentPageGroup );
+
+                }
+                else if ( $element.is( $nextNLi ) ) {
+
+                    if ( currentPageGroup >= numOfPageGroupsInTotal ) {
+
+                        return ;
+                    }
+
+                    currentPageGroup ++;
+
+                    reRenderPagination( currentPageGroup );
+
                 }
 
 
@@ -165,35 +270,41 @@ if ( window.businessLocator === undefined ) {
 
             function setDisabled() {
 
-                if ( currentPage === 1 ) {
+                setDisabledBase( currentPage, numOfPagesInTotal, $prevLi, $nextLi );
+                setDisabledBase( currentPageGroup, numOfPageGroupsInTotal, $prevNLi, $nextNLi );
+            }
 
-                    $prevLi.addClass( settings.disabledClassName );
-                    $nextLi.removeClass( settings.disabledClassName );
+
+            function setDisabledBase( currentPageOrPageGroup,
+                                      numOfPagesOrPageGoupsInTotal,
+                                      $prevLiOrNLi,
+                                      $nextLiOrNLi ) {
+
+                if ( currentPageOrPageGroup === 1 && numOfPagesOrPageGoupsInTotal === 1 ) {
+
+                    $prevLiOrNLi.addClass( settings.disabledClassName );
+                    $nextLiOrNLi.addClass( settings.disabledClassName );
 
                 }
-                else if ( currentPage === pagesInTotal ) {
+                else if ( currentPageOrPageGroup === 1 ) {
 
-                    $nextLi.addClass( settings.disabledClassName );
-                    $prevLi.removeClass( settings.disabledClassName );
+                    $prevLiOrNLi.addClass( settings.disabledClassName );
+                    $nextLiOrNLi.removeClass( settings.disabledClassName );
+                }
+                else if ( currentPageOrPageGroup === numOfPagesOrPageGoupsInTotal ) {
+
+                    $nextLiOrNLi.addClass( settings.disabledClassName );
+                    $prevLiOrNLi.removeClass( settings.disabledClassName );
                 }
                 else {
 
-                    $prevLi.removeClass( settings.disabledClassName );
-                    $nextLi.removeClass( settings.disabledClassName );
+                    $prevLiOrNLi.removeClass( settings.disabledClassName );
+                    $nextLiOrNLi.removeClass( settings.disabledClassName );
                 }
 
             }
 
-            function init() {
-
-                setActive( $firstPageNumberLi );
-                setDisabled();
-            }
-
-            init();
-
-            return $containerUl.append( $nextNLi, $nextLi );
-
+            return $containerUl;
         }
 
         return {
@@ -213,6 +324,8 @@ if ( window.businessLocator === undefined ) {
         var suburbTextInputId = 'search-by-suburb';
         var stateSelectId = 'search-by-state';
         var postcodeId = 'search-by-postcode';
+        var searchButtonId = 'search-business';
+        var stateLiterals = [ 'VIC', 'NSW', 'WA', 'SA', 'QLD', 'TAS', 'NT', 'ACT' ];
 
         function $buildSearchSection() { 
 
@@ -226,7 +339,6 @@ if ( window.businessLocator === undefined ) {
 
             var $stateLabel = $( '<label>', { 'for': stateSelectId, 'text': 'State' } );
             var $stateSelect = $( '<select>', { 'id': stateSelectId, 'name': stateSelectId } );
-            var stateLiterals = [ 'VIC', 'NSW', 'WA', 'SA', 'QLD', 'TAS', 'NT', 'ACT' ];
 
 
             var $postcodeLabel = $( '<label>', { 'for': postcodeId, 'text': 'Postcode' } );
@@ -234,7 +346,6 @@ if ( window.businessLocator === undefined ) {
                                                      'type': 'text', 
                                                      'name': postcodeId } );
 
-            var searchButtonId = 'search-business';
             var $searchButton = $( '<button>', { 'id': searchButtonId, 
                                                  'name': searchButtonId, 
                                                  'text': 'Search' } );
@@ -281,7 +392,7 @@ if ( window.businessLocator === undefined ) {
 
                 listHeaderContent: {},
 
-                numberPerPage: 5
+                numOfItemsPerPage: 10
 
             }, options );
 
@@ -295,8 +406,8 @@ if ( window.businessLocator === undefined ) {
                     $list.remove();
                 }
 
-                var start = ( pageNumber - 1 ) * settings.numberPerPage;
-                var end = pageNumber * settings.numberPerPage;
+                var start = ( pageNumber - 1 ) * settings.numOfItemsPerPage;
+                var end = pageNumber * settings.numOfItemsPerPage;
                 var items = settings.items.slice( start, end );
 
                 var listOptions = {
@@ -316,17 +427,15 @@ if ( window.businessLocator === undefined ) {
 
             var paginationOptions = {
 
-                numberInTotal: settings.items.length,
+                numOfItemsInTotal: settings.items.length,
 
-                numberPerPage: settings.numberPerPage,
+                numOfItemsPerPage: settings.numOfItemsPerPage,
 
                 onNumberClick: onNumberClick
 
             };
 
             var $pager = ui.component.pagination.$createPagination( paginationOptions );
-
-            onNumberClick( 1 );
 
             return $containerDiv.append( $pager );
 
