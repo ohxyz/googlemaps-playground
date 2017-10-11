@@ -100,29 +100,29 @@ if ( window.businessLocator === undefined ) {
             }
 
 
-            function reRenderPagination( pageGroupNumber, pageActivated ) {
+            function reRenderPagination( pageGroupNumber, activePageNumber ) {
 
                 var $containerParent = $containerUl.parent();
 
-                renderPagination( pageGroupNumber, pageActivated );
+                renderPagination( pageGroupNumber, activePageNumber );
                 $containerParent.append( $containerUl );
             }
 
 
             /*
              *
-             * @param { number } - pageActivated is from 1 to settings.numOfPagesInPageGroup
+             * @param { number } - activePageNumber is from 1 to settings.numOfPagesInPageGroup
              */
-            function renderPagination( pageGroupNumber, pageActivated ) {
+            function renderPagination( pageGroupNumber, activePageNumber ) {
 
                 if ( $containerUl !== null && $containerUl.length >= 1 ) {
 
                     $containerUl.remove();
                 }
 
-                var pageActivated = pageActivated === undefined ? 1 : pageActivated;
+                var activePageNumber = activePageNumber === undefined ? 1 : activePageNumber;
 
-                currentPage = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + pageActivated;
+                currentPage = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + activePageNumber;
 
                 $containerUl = $( '<ul>', { 'class': 'pagination' } );
 
@@ -327,6 +327,29 @@ if ( window.businessLocator === undefined ) {
         var searchButtonId = 'search-business';
         var stateLiterals = [ 'VIC', 'NSW', 'WA', 'SA', 'QLD', 'TAS', 'NT', 'ACT' ];
 
+        var $container = null;
+        var $searchResultsDiv = null;
+        var map = null;
+
+        function init( $element, googleMap ) {
+
+            $container = $element;
+            map = googleMap;
+        }
+
+
+        function $getContainer() {
+
+            return $container;
+        }
+
+
+        function getMap() {
+
+            return map;
+        }
+
+
         function $buildSearchSection() { 
 
             var $containerDiv = $( '<div>', { 'id': 'search-section' } );
@@ -339,6 +362,7 @@ if ( window.businessLocator === undefined ) {
 
             var $stateLabel = $( '<label>', { 'for': stateSelectId, 'text': 'State' } );
             var $stateSelect = $( '<select>', { 'id': stateSelectId, 'name': stateSelectId } );
+            var $selectStateOption = $( '<option>', { 'value': '', 'text': 'Select State' } );
 
 
             var $postcodeLabel = $( '<label>', { 'for': postcodeId, 'text': 'Postcode' } );
@@ -350,6 +374,8 @@ if ( window.businessLocator === undefined ) {
                                                  'name': searchButtonId, 
                                                  'text': 'Search' } );
 
+
+            $stateSelect.append( $selectStateOption );
             stateLiterals.forEach( function ( stateAbbr ) {
 
                 var $stateOption = $( '<option>', { 'value': stateAbbr, 'text': stateAbbr } );
@@ -362,6 +388,7 @@ if ( window.businessLocator === undefined ) {
                 event.preventDefault();
 
                 var searchContent = getSearchContent( $( this ) );
+                console.log( 1, searchContent );
                 var coords = compute.getCoords( searchContent, handleGeocodingReponse );
                 
             } );
@@ -519,19 +546,86 @@ if ( window.businessLocator === undefined ) {
 
             props.forEach( function ( prop ) {
 
-                var $span = $( '<span>', { 
+                var $span = null;
+                var spanClassName = '';
+                var spanContent = null;
+                var returnValue = null;
 
-                    'class': prop,
+                if ( typeof prop === 'string' ) {
 
-                    'text': object[ prop ]
+                    spanClassName = prop;
+                    spanContent = object[ prop ];
 
-                } );
+                    var $span = $( '<span>', { 
+
+                        'class': spanClassName,
+
+                        'html': spanContent
+
+                    } );
+                }
+
+                // Only for JSON like object
+                else if ( typeof prop === 'object' ) {
+
+                    for ( var key in prop ) {
+
+                        spanClassName= key;
+                        spanContent = prop[ key ];
+
+                        $span = $( '<span>', { 'class': spanClassName } ); 
+
+                        if ( typeof spanContent === 'string' ) {
+
+                            $span.html( spanContent );
+                        }
+                    }
+                }
+                else if ( typeof prop === 'function' ) {
+
+                    $span = $( '<span>', { 'class': spanClassName } ); 
+
+                    returnValue = prop( object );
+
+                    if ( returnValue instanceof jQuery ) {
+
+                        $span.append( returnValue );
+
+                    }
+                }
 
                 $li.append( $span );
 
             } );
 
             return $li;
+        }
+
+
+        function $createLocationDetailsImage( item ) {
+
+            var $img = $( '<img>', {
+
+                'class': 'location-details-image',
+                'alt': '', 
+                'src': 'LocationDetails.png' 
+            } );
+
+            $img.on( 'click', function ( event ) { 
+
+                var latLng = {
+
+                    lat: item.Latitude,
+                    lng: item.Longitude
+                };
+
+                var map = getMap();
+
+                ui.map.zoomIn( map, latLng );
+
+            } );
+
+            return $img;
         }
 
 
@@ -545,13 +639,33 @@ if ( window.businessLocator === undefined ) {
 
                 lat: geoLocation.lat(), 
                 lng: geoLocation.lng() 
-            } ;
+            };
 
             compute.sortByDistance( latLng, ui.locations );
-            $buildSearchResultsSection( ui.locations );
+
+            var options = {
+
+                items: ui.locations,
+
+                listItemFields: [ 'LocationTitle', 'Address1', $createLocationDetailsImage ],
+
+                listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' }
+            }
+
+            var $newSearchResultsDiv = $buildListWithPagination( options );
+
+            if ( $searchResultsDiv === null ) {
+
+                $container.append( $newSearchResultsDiv );
+            }
+            else {
+
+                $searchResultsDiv.replaceWith( $newSearchResultsDiv );
+            }
+            
+            $searchResultsDiv = $newSearchResultsDiv;
 
         }
-
 
         function getSearchContent( $form ) {
 
@@ -585,6 +699,8 @@ if ( window.businessLocator === undefined ) {
 
         return {
 
+            init: init,
+            $getContainer: $getContainer,
             $buildList: $buildList,
             $buildListWithPagination: $buildListWithPagination,
             $buildSearchSection: $buildSearchSection,
@@ -600,11 +716,34 @@ if ( window.businessLocator === undefined ) {
      */
     ui.map = ( function () {
 
+        var map = null;
         var markerPath = 'marker-oe.png';
         var uluru = { lat: -25.363, lng: 131.044 };
 
         var mapDiv = document.createElement( 'div' );
         mapDiv.setAttribute( 'id', 'map' );
+
+        function init( locations ) {
+
+            var googleMap = generateMap( uluru );
+            
+            map = googleMap;
+
+            populateMarkers( map, locations );
+
+        }
+
+        function getMap() {
+
+            return map;
+        }
+
+
+        function zoomIn( map, latLng ) {
+
+            map.setCenter( latLng );
+            map.setZoom( 12 );
+        }
 
 
         function generateMap( mapCenter) {
@@ -615,9 +754,20 @@ if ( window.businessLocator === undefined ) {
                 center: mapCenter
             };
 
-            var map = new google.maps.Map( mapDiv, mapOptions );
+            var googleMap = new google.maps.Map( mapDiv, mapOptions );
 
-            return map;
+            return googleMap;
+        }
+
+        function createInfoWindow( businessLocation ) {
+
+            var infoWindow = new google.maps.InfoWindow( {
+
+                content: businessLocation[ 'LocationTitle' ]
+
+            } );
+
+            return infoWindow;
 
         }
 
@@ -649,30 +799,21 @@ if ( window.businessLocator === undefined ) {
                         infoWindow.close();
                     }
 
-                    infoWindow = new google.maps.InfoWindow( {
-
-                        content: businessLocation[ 'LocationTitle' ]
-                    } );
-
+                    infoWindow = createInfoWindow( businessLocation );
                     infoWindow.open( map, marker );
                 } );
 
             } );
         }
 
-
-        function init( locations ) {
-
-            var map = generateMap( uluru );
-            populateMarkers( map, locations );
-
-        }
-
-
         return {
 
+            init: init,
+            createInfoWindow: createInfoWindow,
+            getMap: getMap,
             container: mapDiv,
-            init: init
+            zoomIn: zoomIn
+
         };
 
     } )();
@@ -689,7 +830,9 @@ if ( window.businessLocator === undefined ) {
         var uiMap = ui.map;
  
         var $businessLocatorDiv = $( '#' + elementId );
+
         uiMap.init( locations );
+        uiDom.init( $businessLocatorDiv, uiMap.getMap() );
 
         this.locations = locations;        
         $businessLocatorDiv.append( uiDom.$buildSearchSection(), uiMap.container );
@@ -701,6 +844,15 @@ if ( window.businessLocator === undefined ) {
      *
      */
     var compute = ( function () {
+
+        /*
+         * Compute module init method
+         *
+         */
+        function init() {
+
+
+        }
 
         /*
          * Calculate distance between two coordinates
@@ -774,15 +926,6 @@ if ( window.businessLocator === undefined ) {
 
         }
 
-        /*
-         * Compute module init method
-         *
-         */
-        function init() {
-
-
-        }
-
         return {
 
             calculateDistance: calculateDistance,
@@ -804,12 +947,11 @@ if ( window.businessLocator === undefined ) {
 
     module.init = function () {
         
-        ui.init( 'business-locator', dummyLocations );
-        compute.init();
+        ui.init( 'business-locator', businessLocator.locations );
+        
     };
 
     return module;
 
 } )( window.businessLocator, jQuery );
-
 

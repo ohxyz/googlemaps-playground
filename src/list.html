@@ -25,16 +25,15 @@
 
     }
 
-    .LocationTitle {
+    .list span {
 
-        width: 40% ;
+        padding: 8px ;
     }
 
     .pagination {
 
         cursor: pointer;
     }
-
 
     .pagination li {
 
@@ -80,22 +79,44 @@
 
                 'LocationTitle': 'Title ' + ( index + 1 ),
                 'Address1': 'Address ' + ( index + 1 ),
-            }
+                'Others': 'Ot ' + ( index - 1 )
+            };
 
         } );
+
+        function createImage( item ) {
+
+            var $img = $( '<img>', { alt: '', src: 'LocationDetails.png' } );
+
+            $img.on( 'click', function ( event ) { 
+
+                
+
+                var latLng = {
+
+                    lat: item.Latitude,
+                    lng: item.Longitude
+                };
+
+                console.log( latLng );
+
+            } );
+
+            return $img;
+        }
 
         var listOptions = {
 
             // dummyLocations, businessLocator.locations, ...
-            items: dummy,
+            items: businessLocator.locations,
 
-            listItemFields: [ 'LocationTitle', 'Address1' ],
+            listItemFields: [ 'LocationTitle', 'Address1', createImage ],
 
             listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' },
 
         };
 
-        $list = businessLocator.ui.dom.$buildListWithPagination( listOptions );
+        var $list = businessLocator.ui.dom.$buildListWithPagination( listOptions );
 
         $( '#list-test' ).append( $list );
     </script>
