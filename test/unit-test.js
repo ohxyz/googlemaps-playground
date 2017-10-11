@@ -17,13 +17,13 @@ describe( 'UI module', function () {
             $postcode.val( ' 8888 ' );
 
             var content = businessLocator.ui.dom.getSearchContent( $form );
-            expect( content ).to.equal( 'no name VIC 8888' );
+            expect( content ).to.equal( 'no name  8888' );
 
         } );
 
         it( 'should be NSW', function () { 
 
-            $state.find( 'option:eq(1)' ).prop( 'selected', true );
+            $state.find( 'option:eq(2)' ).prop( 'selected', true );
 
             var content = businessLocator.ui.dom.getSearchContent( $form );
             expect( content ).to.equal( 'NSW' );
@@ -33,7 +33,7 @@ describe( 'UI module', function () {
         it( 'should be suburb and state only', function () { 
 
             $suburb.val( '   Suburb name ' );
-            $state.find( 'option:eq(2)' ).prop( 'selected', true );
+            $state.find( 'option:eq(3)' ).prop( 'selected', true );
 
             var content = businessLocator.ui.dom.getSearchContent( $form );
             expect( content ).to.equal( 'Suburb name WA' );
@@ -43,7 +43,7 @@ describe( 'UI module', function () {
         it( 'should be state and postcode only', function () { 
 
             $postcode.val( '9999' );
-            $state.find( 'option:eq(2)' ).prop( 'selected', true );
+            $state.find( 'option:eq(3)' ).prop( 'selected', true );
 
             var content = businessLocator.ui.dom.getSearchContent( $form );
             expect( content ).to.equal( 'WA 9999' );

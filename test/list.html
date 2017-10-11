@@ -65,9 +65,9 @@
     <h2>List Test</h2>
     <div id="list-test"></div>
 
-    <script src="jquery.min.js"></script>
-    <script src="business-locator-locations.js"></script>
-    <script src="business-locator.js"></script>
+    <script src="../src/jquery.min.js"></script>
+    <script src="../src/business-locator-locations.js"></script>
+    <script src="../src/business-locator.js"></script>
     <script src="dummy-locations.js"></script>
     <script>
 
@@ -86,11 +86,9 @@
 
         function createImage( item ) {
 
-            var $img = $( '<img>', { alt: '', src: 'LocationDetails.png' } );
+            var $img = $( '<img>', { alt: '', src: '/src/LocationDetails.png' } );
 
             $img.on( 'click', function ( event ) { 
-
-                
 
                 var latLng = {
 

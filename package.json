@@ -1,5 +1,5 @@
 {
-  "name": "googlemap-playground",
+  "name": "LPG Business Locator",
   "version": "1.0.0",
   "description": "",
   "scripts": {
@@ -7,5 +7,4 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
 }

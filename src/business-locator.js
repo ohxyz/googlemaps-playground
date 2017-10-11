@@ -3,6 +3,7 @@
  * Requires IE9+
  * 
  * @requires jQuery
+ * @author Busheng Xi <busheng.xi@originenergy.com.au>
  *
  */
 
@@ -26,6 +27,13 @@ if ( window.businessLocator === undefined ) {
  *            --- compute ( module )
  *
  *
+ *            ui.dom
+ *              |
+ *            ui.map
+ *              |
+ *            compute
+ *
+ *
  * @summary UI module is on the top of Compute module
  *          
  */
@@ -37,6 +45,15 @@ if ( window.businessLocator === undefined ) {
      * 
      */
     var ui = {};
+
+    ui.resources = {
+
+        images: {
+
+            locationDetails: '/src/locationDetails.png',
+            mapMarker: '/src/marker-oe.png'
+        }
+    }
 
     ui.locations = [];
 
@@ -65,7 +82,7 @@ if ( window.businessLocator === undefined ) {
 
                 pageNumberClassName: 'page-number',
 
-                onNumberClick: function() {}
+                onButtonClick: function() {}
 
             }, options );
 
@@ -93,7 +110,7 @@ if ( window.businessLocator === undefined ) {
                 var pageNumer = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + 1;
 
                 renderPagination( pageGroupNumber );
-                settings.onNumberClick( pageNumer )
+                settings.onButtonClick( pageNumer )
 
                 setActive( $firstPageNumberLi );
                 setDisabled();
@@ -186,8 +203,6 @@ if ( window.businessLocator === undefined ) {
 
                     currentPage = $element.data( propName );
 
-                    console.log( 'c', currentPage );
-
                 }
                 else if( $element.is( $prevLi ) ) {
 
@@ -246,7 +261,7 @@ if ( window.businessLocator === undefined ) {
                 }
 
 
-                settings.onNumberClick( currentPage );
+                settings.onButtonClick( currentPage );
                 setDisabled();
                 setActive();
             }
@@ -388,7 +403,6 @@ if ( window.businessLocator === undefined ) {
                 event.preventDefault();
 
                 var searchContent = getSearchContent( $( this ) );
-                console.log( 1, searchContent );
                 var coords = compute.getCoords( searchContent, handleGeocodingReponse );
                 
             } );
@@ -426,7 +440,7 @@ if ( window.businessLocator === undefined ) {
             var $containerDiv = $( '<div>' );
             var $list = null;
 
-            var onNumberClick = function ( pageNumber ) {
+            var onButtonClick = function ( pageNumber ) {
 
                 if ( $list !== null ) {
 
@@ -458,7 +472,7 @@ if ( window.businessLocator === undefined ) {
 
                 numOfItemsPerPage: settings.numOfItemsPerPage,
 
-                onNumberClick: onNumberClick
+                onButtonClick: onButtonClick
 
             };
 
@@ -608,7 +622,7 @@ if ( window.businessLocator === undefined ) {
 
                 'class': 'location-details-image',
                 'alt': '', 
-                'src': 'LocationDetails.png' 
+                'src': ui.resources.images.locationDetails
             } );
 
             $img.on( 'click', function ( event ) { 
@@ -717,7 +731,6 @@ if ( window.businessLocator === undefined ) {
     ui.map = ( function () {
 
         var map = null;
-        var markerPath = 'marker-oe.png';
         var uluru = { lat: -25.363, lng: 131.044 };
 
         var mapDiv = document.createElement( 'div' );
@@ -788,7 +801,7 @@ if ( window.businessLocator === undefined ) {
 
                     position: latLng,
                     map: map,
-                    icon: markerPath
+                    icon: ui.resources.images.mapMarker
 
                 } );
 
@@ -858,7 +871,7 @@ if ( window.businessLocator === undefined ) {
          * Calculate distance between two coordinates
          * 
          * @param geoCoords1 - eg. { lat: -37.807977, lng: 144.969106 }
-         * @return - Direct distance NOT walking, driving or fly distances.
+         * @return - Direct distance, NOT walking, driving or fly distances.
          */ 
         function calculateDistance( geoCoords1, geoCoords2 ) {
 
