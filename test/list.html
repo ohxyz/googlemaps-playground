@@ -103,14 +103,33 @@
             return $img;
         }
 
+        function getFullAddress( businessLocation ) {
+
+            return [ businessLocation.Address1, businessLocation.Suburb, businessLocation.Postcode ].join( ', ' );
+        }
+
+        function $createLocationNameLink( businessLocation ) {
+
+            var $a = $( '<a>', { 'href': '', 'text': businessLocation.LocationTitle });
+
+            $a.on( 'click', function ( event ) { 
+
+                event.preventDefault();
+            } );
+
+            return $a;
+        }
+
+        var FullAddress = function ( obj ) { return getFullAddress( obj ) };
+
         var listOptions = {
 
             // dummyLocations, businessLocator.locations, ...
             items: businessLocator.locations,
 
-            listItemFields: [ 'LocationTitle', 'Address1', createImage ],
+            listItemFields: [ $createLocationNameLink, FullAddress, createImage ],
 
-            listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' },
+            listHeaderContent: [ 'Title', 'Address' ]
 
         };
 

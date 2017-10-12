@@ -20,14 +20,13 @@ if ( window.businessLocator === undefined ) {
  *           |                      --- dom ( module )
  *           |                     |
  *           |                      --- map ( module )
- *           |                     |
- *           |                      --- init ( method )
+ *           |
  *           |
  *           |
  *            --- compute ( module )
  *
  *
- *            ui.dom
+ *            ui.dom <- ui.component
  *              |
  *            ui.map
  *              |
@@ -55,6 +54,11 @@ if ( window.businessLocator === undefined ) {
         }
     }
 
+    /*
+     * Each item in this array, is a `businessLocation` object
+     * `businessLocation` is used as the name of arguments in various functions.
+     *
+     */
     ui.locations = [];
 
     ui.component = {};
@@ -74,7 +78,7 @@ if ( window.businessLocator === undefined ) {
 
                 numOfItemsPerPage: 10,
 
-                numOfPagesInPageGroup: 11,
+                numOfPagesInPageGroup: 10,
 
                 disabledClassName: 'disabled',
 
@@ -260,7 +264,6 @@ if ( window.businessLocator === undefined ) {
 
                 }
 
-
                 settings.onButtonClick( currentPage );
                 setDisabled();
                 setActive();
@@ -299,7 +302,6 @@ if ( window.businessLocator === undefined ) {
 
                     $prevLiOrNLi.addClass( settings.disabledClassName );
                     $nextLiOrNLi.addClass( settings.disabledClassName );
-
                 }
                 else if ( currentPageOrPageGroup === 1 ) {
 
@@ -489,21 +491,19 @@ if ( window.businessLocator === undefined ) {
 
                 className: 'list-header',
 
-                fields: [],
-
-                content: {}
+                content: []
 
             }, options );
 
             var $listHeaderLi = $( '<li>', { 'class': settings.className } );
 
-            settings.fields.forEach( function ( fieldName ) {
+            settings.content.forEach( function ( one, index ) {
 
                 var $span = $( '<span>', {
 
-                    'class': fieldName,
+                    'class': one,
 
-                    'text': settings.content[ fieldName ]
+                    'text': one
 
                 } );
 
@@ -525,7 +525,7 @@ if ( window.businessLocator === undefined ) {
 
                 listItemFields: [],
 
-                listHeaderContent: {}
+                listHeaderContent: []
 
             }, options );
 
@@ -554,7 +554,7 @@ if ( window.businessLocator === undefined ) {
         }
 
 
-        function $buildListItem( props, object ) {
+        function $buildListItem( props, item ) {
 
             var $li = $( '<li>' );
 
@@ -568,7 +568,7 @@ if ( window.businessLocator === undefined ) {
                 if ( typeof prop === 'string' ) {
 
                     spanClassName = prop;
-                    spanContent = object[ prop ];
+                    spanContent = item[ prop ];
 
                     var $span = $( '<span>', { 
 
@@ -597,14 +597,18 @@ if ( window.businessLocator === undefined ) {
                 }
                 else if ( typeof prop === 'function' ) {
 
-                    $span = $( '<span>', { 'class': spanClassName } ); 
+                    $span = $( '<span>', { 'class': prop.name } ); 
 
-                    returnValue = prop( object );
+                    returnValue = prop( item );
 
                     if ( returnValue instanceof jQuery ) {
 
                         $span.append( returnValue );
 
+                    }
+                    else if ( typeof returnValue === 'string' ) {
+
+                        $span.html( returnValue );
                     }
                 }
 
@@ -615,8 +619,37 @@ if ( window.businessLocator === undefined ) {
             return $li;
         }
 
+        function $buildSearchSummary( numOfItemsInTotal, numOfPagesInTotal ) {
 
-        function $createLocationDetailsImage( item ) {
+            var numOfItemsInTotal = isNaN( numOfItemsInTotal ) === true ? 0 : numOfItemsInTotal;
+            var numOfPagesInTotal = isNaN( numOfPagesInTotal ) === true ? 0 : numOfPagesInTotal;
+
+            var $searchSummaryDiv = $( '<div>', { 'id': 'search-summary' } );
+            var content = 'Search returned ' + numOfItemsInTotal + ' records(s) ' + numOfPagesInTotal + ' page(s)';
+
+            return $searchSummaryDiv.html( content );
+        }
+
+        function getFullAddress( businessLocation ) {
+
+            return [ businessLocation.Address1, businessLocation.Suburb, businessLocation.Postcode ].join( ', ' );
+        }
+
+        function $createLocationNameLink( businessLocation ) {
+
+            var $a = $( '<a>', { 'href': '', 'text': businessLocation.LocationTitle });
+
+            $a.on( 'click', function ( event ) { 
+
+                event.preventDefault();
+                ui.map.locateLocation( businessLocation );
+            } );
+
+            return $a;
+        }
+
+
+        function $createLocationDetailsImage( businessLocation ) {
 
             var $img = $( '<img>', {
 
@@ -625,17 +658,9 @@ if ( window.businessLocator === undefined ) {
                 'src': ui.resources.images.locationDetails
             } );
 
-            $img.on( 'click', function ( event ) { 
+            $img.on( 'click', function() {
 
-                var latLng = {
-
-                    lat: item.Latitude,
-                    lng: item.Longitude
-                };
-
-                var map = getMap();
-
-                ui.map.zoomIn( map, latLng );
+                ui.map.locateLocation( businessLocation );
 
             } );
 
@@ -645,10 +670,10 @@ if ( window.businessLocator === undefined ) {
 
         function handleGeocodingReponse( response ) {
 
-            var locationInfo = response[ 0 ];
-            var address = locationInfo.formatted_address;
+            var locationInfoFromSearch = response[ 0 ];
+            var address = locationInfoFromSearch.formatted_address;
 
-            var geoLocation = locationInfo.geometry.location
+            var geoLocation = locationInfoFromSearch.geometry.location
             var latLng = {
 
                 lat: geoLocation.lat(), 
@@ -657,16 +682,37 @@ if ( window.businessLocator === undefined ) {
 
             compute.sortByDistance( latLng, ui.locations );
 
-            var options = {
+            var closestLocation = ui.locations[ 0 ];
+            var map = ui.map.getMap();
+
+            ui.map.populateMarkers( map, ui.locations );
+            ui.map.locateLocation( closestLocation );
+
+            var numOfItems = ui.locations.length;
+            var numPerPage = 10;
+            var numOfPages = Math.ceil( numOfItems / numPerPage );
+
+            var $searchSummary = $buildSearchSummary( numOfItems, numOfPages );
+
+            // Create DOM element class names. Function names are class names.
+            var FullAddress = function ( arg ) { return getFullAddress( arg ); };
+            var LocationDetailsImage = function( arg) { return $createLocationDetailsImage( arg ); };
+            var LocationTitle = function ( arg ) { return $createLocationNameLink( arg ); };
+
+            var $listWithPagination = $buildListWithPagination( {
 
                 items: ui.locations,
 
-                listItemFields: [ 'LocationTitle', 'Address1', $createLocationDetailsImage ],
+                numOfItemsPerPage: numPerPage,
 
-                listHeaderContent: { 'LocationTitle': 'Title', 'Address1': 'Address' }
-            }
+                listItemFields: [ LocationTitle, FullAddress, LocationDetailsImage ],
 
-            var $newSearchResultsDiv = $buildListWithPagination( options );
+                listHeaderContent: [ 'Title', 'Address' ]
+
+            } );
+
+            var $newSearchResultsDiv = $( '<div>', { 'id': 'search-results-section' } )
+            $newSearchResultsDiv.append( $searchSummary, $listWithPagination );
 
             if ( $searchResultsDiv === null ) {
 
@@ -731,6 +777,7 @@ if ( window.businessLocator === undefined ) {
     ui.map = ( function () {
 
         var map = null;
+        var infoWindow = null;
         var uluru = { lat: -25.363, lng: 131.044 };
 
         var mapDiv = document.createElement( 'div' );
@@ -741,8 +788,6 @@ if ( window.businessLocator === undefined ) {
             var googleMap = generateMap( uluru );
             
             map = googleMap;
-
-            populateMarkers( map, locations );
 
         }
 
@@ -772,6 +817,7 @@ if ( window.businessLocator === undefined ) {
             return googleMap;
         }
 
+
         function createInfoWindow( businessLocation ) {
 
             var infoWindow = new google.maps.InfoWindow( {
@@ -785,45 +831,99 @@ if ( window.businessLocator === undefined ) {
         }
 
 
+        function openInfoWindow( map, marker, businessLocation ) {
+
+            if ( infoWindow !== null ) {
+
+                infoWindow.close();
+            }
+
+            infoWindow = createInfoWindow( businessLocation );
+            infoWindow.open( map, marker );
+        }
+
+        /*
+         *
+         * Create a marker with infoWindow and zoomed in.
+         *
+         * @summary - Only one Marker can be created on same latLng
+         * @param { boolean } - withInfoWindow
+         * 
+         */
+        function createMarker( map, businessLocation, withInfoWindow ) {
+
+            var latLng = new google.maps.LatLng( {
+
+                lat: businessLocation[ 'Latitude' ],
+                lng: businessLocation[ 'Longitude' ]
+
+            } );
+
+            var marker = new google.maps.Marker( {
+
+                position: latLng,
+                map: map,
+                icon: ui.resources.images.mapMarker
+
+            } );
+
+            if ( withInfoWindow === true ) {
+
+                openInfoWindow( map, marker, businessLocation );
+            }
+
+            return marker;
+
+        }
+
+
         function populateMarkers( map, locations ) {
+
+            var firstMarker = null;
+            var firstLocation = null;
      
-            var infoWindow = null;
+            locations.forEach( function( businessLocation, index ) {
 
-            locations.forEach( function( businessLocation ) {
+                var marker = createMarker( map, businessLocation, false );
+                
+                if ( index === 0 ) {
 
-                var latLng = new google.maps.LatLng( {
-
-                    lat: businessLocation[ 'Latitude' ],
-                    lng: businessLocation[ 'Longitude' ]
-                } );
-
-                var marker = new google.maps.Marker( {
-
-                    position: latLng,
-                    map: map,
-                    icon: ui.resources.images.mapMarker
-
-                } );
+                    firstLocation = businessLocation;
+                    firstMarker = marker;
+                }
 
                 marker.addListener( 'click', function () {
 
-                    if ( infoWindow !== null ) {
+                    openInfoWindow( map, marker, businessLocation );
 
-                        infoWindow.close();
-                    }
-
-                    infoWindow = createInfoWindow( businessLocation );
-                    infoWindow.open( map, marker );
                 } );
 
             } );
         }
 
+
+        function locateLocation( businessLocation ) {
+
+            var latLng = {
+
+                    lat: businessLocation.Latitude,
+                    lng: businessLocation.Longitude
+                };
+
+            var map = getMap();
+
+            zoomIn( map, latLng);
+            createMarker( map, businessLocation, true );
+        }
+
         return {
 
             init: init,
+            populateMarkers: populateMarkers,
             createInfoWindow: createInfoWindow,
+            createMarker: createMarker,
             getMap: getMap,
+            locateLocation: locateLocation,
             container: mapDiv,
             zoomIn: zoomIn
 
@@ -857,15 +957,6 @@ if ( window.businessLocator === undefined ) {
      *
      */
     var compute = ( function () {
-
-        /*
-         * Compute module init method
-         *
-         */
-        function init() {
-
-
-        }
 
         /*
          * Calculate distance between two coordinates
@@ -944,7 +1035,6 @@ if ( window.businessLocator === undefined ) {
             calculateDistance: calculateDistance,
             sortByDistance: sortByDistance,
             getCoords: getCoords,
-            init: init
 
         };
 
