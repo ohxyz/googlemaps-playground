@@ -356,6 +356,7 @@ if ( window.businessLocator === undefined ) {
 
         var $container = null;
         var $searchResultsDiv = null;
+        var $errorMessageDiv = null;
         var map = null;
 
         function init( $element, googleMap ) {
@@ -381,6 +382,9 @@ if ( window.businessLocator === undefined ) {
 
             var $containerDiv = $( '<div>', { 'id': 'search-section' } );
             var $searchForm = $( '<form>', { 'id': 'search-form' } );
+            var $formRow1 = $( '<div>', { 'class': 'form-row' } );
+            var $formRow2 = $formRow1.clone();
+            var $formRow3 = $formRow1.clone();
 
             var $suburbLabel = $( '<label>', { 'for': suburbTextInputId, 'text': 'Suburb' } );
             var $suburbTextInput = $( '<input>', { 'id': suburbTextInputId, 
@@ -401,6 +405,7 @@ if ( window.businessLocator === undefined ) {
                                                  'name': searchButtonId, 
                                                  'text': 'Search' } );
 
+            $errorMessageDiv = $( '<div>', { 'class': 'error-message' } );
 
             $stateSelect.append( $selectStateOption );
             stateLiterals.forEach( function ( stateAbbr ) {
@@ -414,18 +419,26 @@ if ( window.businessLocator === undefined ) {
 
                 event.preventDefault();
 
+                if ( $suburbTextInput.val() === ''
+                        && $stateSelect.val() === ''
+                        && $postcodeTextInput.val() === '' ) {
+
+                    $errorMessageDiv.text( 'Please fill at least one field.' );
+                    return;
+                }
+                else {
+
+                    $errorMessageDiv.text( '' );
+                }
+
                 var searchContent = getSearchContent( $( this ) );
                 var coords = compute.getCoords( searchContent, handleGeocodingReponse );
                 
             } );
 
-            $searchForm.append( $suburbLabel, 
-                                $suburbTextInput, 
-                                $stateLabel,
-                                $stateSelect,
-                                $postcodeLabel,
-                                $postcodeTextInput, 
-                                $searchButton );
+            $searchForm.append( $formRow1.append( $suburbLabel, $suburbTextInput ),
+                                $formRow2.append( $stateLabel, $stateSelect, $postcodeLabel, $postcodeTextInput ),
+                                $formRow3.append( $errorMessageDiv, $searchButton ) );
 
             return $containerDiv.append( $searchForm );
         }
