@@ -39,6 +39,16 @@ if ( window.businessLocator === undefined ) {
 
 ( function ( module, $ ) {
 
+    var util = {
+
+        hyphenateCamels: function ( word ) {
+
+            // https://gist.github.com/youssman/745578062609e8acac9f
+            return word.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
+        }
+
+    };
+
     /* 
      * UI module container 
      * 
@@ -597,7 +607,7 @@ if ( window.businessLocator === undefined ) {
                 }
                 else if ( typeof prop === 'function' ) {
 
-                    $span = $( '<span>', { 'class': prop.name } ); 
+                    $span = $( '<span>', { 'class': util.hyphenateCamels( prop.name ) } ); 
 
                     returnValue = prop( item );
 
@@ -637,7 +647,7 @@ if ( window.businessLocator === undefined ) {
 
         function $createLocationNameLink( businessLocation ) {
 
-            var $a = $( '<a>', { 'href': '', 'text': businessLocation.LocationTitle });
+            var $a = $( '<a>', { 'class': 'location-name', 'href': '', 'text': businessLocation.LocationTitle });
 
             $a.on( 'click', function ( event ) { 
 
@@ -1045,6 +1055,7 @@ if ( window.businessLocator === undefined ) {
      * Main
      *
      */
+    module.util = util;
     module.ui = ui;
     module.compute = compute;
 

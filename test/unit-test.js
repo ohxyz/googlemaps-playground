@@ -1,6 +1,22 @@
 mocha.setup( 'bdd' );
 
-var expect = chai.expect;   
+var expect = chai.expect;
+
+describe( 'Util module', function () {
+
+    describe( 'Method: camelToHyphen', function () { 
+
+        it( 'should convert capital letters to hyphens', function () { 
+
+            var result = businessLocator.util.hyphenateCamels( 'MyUtilTest' );
+
+            expect( result ).to.equal( 'my-util-test');
+
+        } );
+
+    } );
+
+} );
 
 describe( 'UI module', function () {
 
