@@ -472,12 +472,21 @@ if ( window.businessLocator === undefined ) {
 
                 event.preventDefault();
 
-                if ( $suburbTextInput.val() === ''
-                        && $stateSelect.val() === ''
-                        && $postcodeTextInput.val() === '' ) {
+                var suburb = $suburbTextInput.val().trim();
+                var state = $stateSelect.val();
+                var postcode = $postcodeTextInput.val().trim();
+
+                if ( suburb === '' && state === '' && postcode === '' ) {
                     
                     $errorMessageDiv.text( 'Please fill at least one field.' )
                                     .insertBefore( $searchButton );
+                    return;
+                }
+                else if ( /^[0-9]{4}$/.test( postcode ) === false ) {
+
+                    $errorMessageDiv.text( 'Postcode must be 4 digits.' )
+                                    .insertBefore( $searchButton );
+
                     return;
                 }
                 else {
