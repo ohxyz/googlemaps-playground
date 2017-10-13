@@ -34,7 +34,7 @@ if ( window.businessLocator === undefined ) {
  *
  * @summary - UI module is on the top of Compute module
  *
- *            DOM ready => Load Google APIs script => Load map 
+ *            DOM ready => Load Google APIs script => Load search form and map 
  *          
  */
 
@@ -52,15 +52,58 @@ if ( window.businessLocator === undefined ) {
 
     var isGoolgeScriptLoaded = false;
 
+
+    /* Load Google Maps API script into HTML page.
+     *
+     */
+    function loadGoogleApis() {
+
+        var callbackName = 'businessLocator.init';
+        var src = 'https://maps.googleapis.com/maps/api/js?key=' 
+            + conf.googleApiKey 
+            + '&libraries=geometry&callback='
+            + callbackName;
+
+        $.getScript( src )
+            .done( function () {
+
+                isGoolgeScriptLoaded = true;
+
+            } )
+            .fail( function ( jqxhr, settings, exception ) {
+
+                console.error( 'BUSINESS LOCATOR ERROR: Failed to load Google Maps APIs.' );
+
+            } );
+
+    }
+
+    function isGoolgeApisReady() {
+
+        return isGoolgeScriptLoaded;
+    }
+
+
+    /* Util module
+     *
+     */
     var util = {
 
         hyphenateCamels: function ( word ) {
 
             // https://gist.github.com/youssman/745578062609e8acac9f
             return word.replace( /([a-z])([A-Z])/g, '$1-$2' ).toLowerCase();
+        },
+
+        getFullAddress: function ( businessLocation, seperator ) {
+
+            var sep = seperator === undefined ? ' ' : seperator;
+
+            return [ businessLocation.Address1, businessLocation.Suburb, businessLocation.Postcode ].join( sep );
         }
 
     };
+
 
     /* UI module container 
      * 
@@ -124,7 +167,6 @@ if ( window.businessLocator === undefined ) {
             var $nextNLi = null;
 
             var $firstPageNumberLi = null;
-            var $pageNumberLi = null;
             var pageNumberLis = [];
 
             var propName = 'pageNumber';
@@ -368,7 +410,6 @@ if ( window.businessLocator === undefined ) {
 
         var $container = null;
         var $searchResultsDiv = null;
-        var $errorMessageDiv = null;
         var map = null;
 
         function init( $element, googleMap ) {
@@ -417,7 +458,7 @@ if ( window.businessLocator === undefined ) {
                                                  'name': searchButtonId, 
                                                  'text': 'Search' } );
 
-            $errorMessageDiv = $( '<div>', { 'class': 'error-message' } );
+            var $errorMessageDiv = $( '<div>', { 'class': 'error-message' } );
 
             $stateSelect.append( $selectStateOption );
             stateLiterals.forEach( function ( stateAbbr ) {
@@ -434,13 +475,14 @@ if ( window.businessLocator === undefined ) {
                 if ( $suburbTextInput.val() === ''
                         && $stateSelect.val() === ''
                         && $postcodeTextInput.val() === '' ) {
-
-                    $errorMessageDiv.text( 'Please fill at least one field.' );
+                    
+                    $errorMessageDiv.text( 'Please fill at least one field.' )
+                                    .insertBefore( $searchButton );
                     return;
                 }
                 else {
 
-                    $errorMessageDiv.text( '' );
+                    $errorMessageDiv.remove();
                 }
 
                 var searchContent = getSearchContent( $( this ) );
@@ -456,7 +498,7 @@ if ( window.businessLocator === undefined ) {
         }
 
 
-        function $buildListWithPagination( options ) {
+        function $buildSearchResultsList( options ) {
 
             var settings = $.extend( {
 
@@ -503,6 +545,10 @@ if ( window.businessLocator === undefined ) {
 
             }
 
+            var numOfPagesInTotal = Math.ceil( settings.items.length / settings.numOfItemsPerPage );
+            
+            var $searchSummary = $createSearchSummary( settings.items.length, numOfPagesInTotal );
+
             var paginationOptions = {
 
                 numOfItemsInTotal: settings.items.length,
@@ -515,7 +561,7 @@ if ( window.businessLocator === undefined ) {
 
             var $pager = ui.component.pagination.$createPagination( paginationOptions );
 
-            return $containerDiv.append( $pager );
+            return $containerDiv.append( $searchSummary, $pager );
 
         }
 
@@ -654,7 +700,7 @@ if ( window.businessLocator === undefined ) {
             return $li;
         }
 
-        function $buildSearchSummary( numOfItemsInTotal, numOfPagesInTotal ) {
+        function $createSearchSummary( numOfItemsInTotal, numOfPagesInTotal ) {
 
             var numOfItemsInTotal = isNaN( numOfItemsInTotal ) === true ? 0 : numOfItemsInTotal;
             var numOfPagesInTotal = isNaN( numOfPagesInTotal ) === true ? 0 : numOfPagesInTotal;
@@ -665,9 +711,30 @@ if ( window.businessLocator === undefined ) {
             return $searchSummaryDiv.html( content );
         }
 
-        function getFullAddress( businessLocation ) {
 
-            return [ businessLocation.Address1, businessLocation.Suburb, businessLocation.Postcode ].join( ', ' );
+        function $createAddressDetails( businessLocation ) {
+
+            var address = util.getFullAddress( businessLocation, ', ' );
+            var phone = businessLocation[ 'PhoneNumber' ];
+
+            var $containerDiv = $( '<div>', { 'class': 'address-details' } );
+            var $addressDiv = $( '<div>', { 'class': 'full-address', 'text': address } );
+
+            var $phoneDiv = null;
+            var $phoneNumberSpan = null;
+            var $phoneTitleSpan = null;
+
+            if ( phone !== '' ) {
+
+                $phoneTitleSpan = $( '<span>', { 'class': 'phone-title', 'text': 'Phone: ' } );
+                $phoneNumberSpan = $( '<span>', { 'class': 'phone-number', 'text': phone } );
+                $phoneDiv = $( '<div>', { 'class': 'phone-details' } );
+
+                $phoneDiv.append( $phoneTitleSpan, $phoneNumberSpan );
+            }
+           
+            return $containerDiv.append( $addressDiv, $phoneDiv );            
+
         }
 
         function $createLocationNameLink( businessLocation ) {
@@ -723,31 +790,25 @@ if ( window.businessLocator === undefined ) {
             ui.map.populateMarkers( map, ui.locations );
             ui.map.locateLocation( closestLocation );
 
-            var numOfItems = ui.locations.length;
-            var numPerPage = 10;
-            var numOfPages = Math.ceil( numOfItems / numPerPage );
-
-            var $searchSummary = $buildSearchSummary( numOfItems, numOfPages );
-
             // Create DOM element class names. Function names are class names.
-            var FullAddress = function ( arg ) { return getFullAddress( arg ); };
+            var LocationDetails = function ( arg ) { return $createAddressDetails( arg ); };
             var LocationDetailsImage = function( arg) { return $createLocationDetailsImage( arg ); };
             var LocationTitle = function ( arg ) { return $createLocationNameLink( arg ); };
 
-            var $listWithPagination = $buildListWithPagination( {
+            var $searchResultsList = $buildSearchResultsList( {
 
                 items: ui.locations,
 
-                numOfItemsPerPage: numPerPage,
+                numOfItemsPerPage: 10,
 
-                listItemFields: [ LocationTitle, FullAddress, LocationDetailsImage ],
+                listItemFields: [ LocationTitle, LocationDetails, LocationDetailsImage ],
 
                 listHeaderContent: [ 'Title', 'Address' ]
 
             } );
 
             var $newSearchResultsDiv = $( '<div>', { 'id': 'search-results-section' } )
-            $newSearchResultsDiv.append( $searchSummary, $listWithPagination );
+            $newSearchResultsDiv.append( $searchResultsList );
 
             if ( $searchResultsDiv === null ) {
 
@@ -797,7 +858,7 @@ if ( window.businessLocator === undefined ) {
             init: init,
             $getContainer: $getContainer,
             $buildList: $buildList,
-            $buildListWithPagination: $buildListWithPagination,
+            $buildSearchResultsList: $buildSearchResultsList,
             $buildSearchSection: $buildSearchSection,
             getSearchContent: getSearchContent
         };
@@ -854,16 +915,44 @@ if ( window.businessLocator === undefined ) {
 
         function createInfoWindow( businessLocation ) {
 
+            var $locationTitleDiv = $( '<div>', {
+
+                'class': 'location-title', 
+                'text': businessLocation[ 'LocationTitle' ] 
+            } );
+
+            var $locationAddressDiv = $( '<div>', { 
+
+                'class': 'location-address',
+                'text': util.getFullAddress( businessLocation )
+
+            } );
+
+            var phoneLiteral = businessLocation[ 'PhoneNumber'] === '' 
+                             ? ''
+                             : 'T: ' + businessLocation[ 'PhoneNumber'];
+
+            var $phoneDiv = $( '<div>', {
+
+                'class': 'location-phone-number',
+                'text': phoneLiteral
+
+            } );
+
+            var $containerDiv = $( '<div>', { 'class': 'info-window-content' } )
+            $containerDiv.append( $locationTitleDiv, $locationAddressDiv, $phoneDiv );
+
+            var contentString = $containerDiv.get( 0 ).outerHTML;
+
             var infoWindow = new google.maps.InfoWindow( {
 
-                content: businessLocation[ 'LocationTitle' ]
+                content: contentString
 
             } );
 
             return infoWindow;
 
         }
-
 
         function openInfoWindow( map, marker, businessLocation ) {
 
@@ -1069,39 +1158,7 @@ if ( window.businessLocator === undefined ) {
 
     } )();
 
-
-    function loadGoogleApis() {
-
-        var callbackName = 'businessLocator.init';
-        var src = 'https://maps.googleapis.com/maps/api/js?key=' 
-            + conf.googleApiKey 
-            + '&libraries=geometry&callback='
-            + callbackName;
-
-        $.getScript( src )
-            .done( function () {
-
-                isGoolgeScriptLoaded = true;
-
-            } )
-            .fail( function ( jqxhr, settings, exception ) {
-
-                console.error( 'BUSINESS LOCATOR ERROR: Failed to load Google Maps APIs.' );
-
-            } );
-
-    }
-
-    function isGoolgeApisReady() {
-
-        return isGoolgeScriptLoaded;
-    }
-
     /* Main */
-
-    /* Load Google Maps API script into HTML page.
-     *
-     */
     $( document ).ready( function () {
 
         loadGoogleApis();
