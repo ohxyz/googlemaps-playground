@@ -14,14 +14,13 @@ if ( window.businessLocator === undefined ) {
     window.businessLocator = {};
 }
 
-/*
- * Module ------- ui ( module ) ------- component( module )
+/* Module ------- ui ( module ) ------- component( module )
  *           |                     |
  *           |                      --- dom ( module )
  *           |                     |
  *           |                      --- map ( module )
  *           |
- *           |
+ *           |--- util (module )
  *           |
  *            --- compute ( module )
  *
@@ -33,11 +32,25 @@ if ( window.businessLocator === undefined ) {
  *            compute
  *
  *
- * @summary UI module is on the top of Compute module
+ * @summary - UI module is on the top of Compute module
+ *
+ *            DOM ready => Load Google APIs script => Load map 
  *          
  */
 
 ( function ( module, $ ) {
+
+    var conf = {
+
+        googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
+
+        locationDetailsImage: '/src/locationDetails.png',
+
+        mapMarkerImage: '/src/marker-oe.png'
+
+    };
+
+    var isGoolgeScriptLoaded = false;
 
     var util = {
 
@@ -49,8 +62,7 @@ if ( window.businessLocator === undefined ) {
 
     };
 
-    /* 
-     * UI module container 
+    /* UI module container 
      * 
      */
     var ui = {};
@@ -59,8 +71,8 @@ if ( window.businessLocator === undefined ) {
 
         images: {
 
-            locationDetails: '/src/locationDetails.png',
-            mapMarker: '/src/marker-oe.png'
+            locationDetails: conf.locationDetailsImage,
+            mapMarker: conf.mapMarkerImage
         }
     }
 
@@ -793,8 +805,7 @@ if ( window.businessLocator === undefined ) {
     } )();
 
 
-    /* 
-     * UI Map submodule - Google Maps APIs related
+    /* UI Map submodule - Google Maps APIs related
      *
      */
     ui.map = ( function () {
@@ -865,9 +876,7 @@ if ( window.businessLocator === undefined ) {
             infoWindow.open( map, marker );
         }
 
-        /*
-         *
-         * Create a marker with infoWindow and zoomed in.
+        /* Create a marker with infoWindow and zoomed in.
          *
          * @summary - Only one Marker can be created on same latLng
          * @param { boolean } - withInfoWindow
@@ -955,8 +964,7 @@ if ( window.businessLocator === undefined ) {
     } )();
 
 
-    /* 
-     *  Build DOM elements into document
+    /* Build DOM elements into document
      *
      *  @param { string } elementId
      */
@@ -974,9 +982,7 @@ if ( window.businessLocator === undefined ) {
         $businessLocatorDiv.append( uiDom.$buildSearchSection(), uiMap.container );
     };
 
-
-    /*
-     * Compute module container
+    /* Compute module container
      *
      */
     var compute = ( function () {
@@ -1064,21 +1070,49 @@ if ( window.businessLocator === undefined ) {
     } )();
 
 
-    /*
-     * Main
+    function loadGoogleApis() {
+
+        var callbackName = 'businessLocator.init';
+        var src = 'https://maps.googleapis.com/maps/api/js?key=' 
+            + conf.googleApiKey 
+            + '&libraries=geometry&callback='
+            + callbackName;
+
+        $.getScript( src )
+            .done( function () {
+
+                isGoolgeScriptLoaded = true;
+
+            } )
+            .fail( function ( jqxhr, settings, exception ) {
+
+                console.error( 'BUSINESS LOCATOR ERROR: Failed to load Google Maps APIs.' );
+
+            } );
+
+    }
+
+    function isGoolgeApisReady() {
+
+        return isGoolgeScriptLoaded;
+    }
+
+    /* Main */
+
+    /* Load Google Maps API script into HTML page.
      *
      */
+    $( document ).ready( function () {
+
+        loadGoogleApis();
+
+    } );
+
+    module.isGoolgeApisReady = isGoolgeApisReady;
     module.util = util;
     module.ui = ui;
     module.compute = compute;
 
-    module.init = function () {
-        
-        ui.init( 'business-locator', businessLocator.locations );
-        
-    };
-
     return module;
 
 } )( window.businessLocator, jQuery );
-
