@@ -1,3 +1,8 @@
+/* Main script
+ * 
+ * 1. Filter out Vitagas and Quickswap
+ * 2. Definition of init
+ */
 
 var vitalgasLocations = [];
 var quickswapLocations = [];
@@ -26,6 +31,9 @@ businessLocator.init = function () {
 
     var link = window.location.pathname;
     var locations = [];
+    var scriptElement = null;
+    var containerElement = null;
+    var containerName = 'business-locator';
 
     if ( link.indexOf( 'bbq-gas') !== -1 ) {
 
@@ -35,10 +43,24 @@ businessLocator.init = function () {
 
         locations = quickswapLocations;
     }
+    else {
+
+        locations = businessLocator.locations;
+    }
+
+    containerElement = document.getElementsByClassName( containerName )[ 0 ];
+
+    if ( containerElement === null || containerElement === undefined ) {
+
+        containerElement = document.createElement( 'div' );
+        containerElement.setAttribute( 'id', containerName );
+        
+        this.currentScript.parentNode.insertBefore( containerElement, this.currentScript.nextSibling );
+    }
 
     try { 
     
-        this.ui.init( 'business-locator', locations );
+        this.ui.init( containerElement, locations );
     }
     catch( error ) {
 

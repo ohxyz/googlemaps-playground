@@ -1,5 +1,4 @@
-/* 
- * Origin LPG business locator
+/* Origin LPG business locator
  * Requires IE9+
  * 
  * @requires jQuery
@@ -8,12 +7,9 @@
  */
 
 /* START: businessLocator module */
-
-
 window.businessLocator = window.businessLocator === undefined
                        ? {}
                        : window.businessLocator;
-
 
 /* Module ---+--- ui ( module ) ---+--- component( module )
  *           |                     |
@@ -56,6 +52,8 @@ window.businessLocator = window.businessLocator === undefined
         mapMarkerImage: '/src/marker-oe.png'
 
     };
+
+    var currentScript = document.currentScript;
 
     var isGoolgeScriptLoaded = false;
 
@@ -1077,12 +1075,21 @@ window.businessLocator = window.businessLocator === undefined
      *
      *  @param { string } elementId
      */
-    ui.init = function ( elementId, locations ) {
+    ui.init = function ( elementOrId, locations ) {
+
+        var $businessLocatorDiv = null;
+
+        if ( typeof elementOrId === 'object' ) {
+
+            $businessLocatorDiv = $( elementOrId );
+        }
+        else if ( typeof elementOrId === 'string' ) {
+
+            $businessLocatorDiv = $( '#' + elementOrId );
+        }
 
         var uiDom = ui.dom;
         var uiMap = ui.map;
- 
-        var $businessLocatorDiv = $( '#' + elementId );
 
         uiMap.init( );
         uiDom.init( $businessLocatorDiv, uiMap.getMap() );
@@ -1200,6 +1207,7 @@ window.businessLocator = window.businessLocator === undefined
     module.ui = ui;
     module.compute = compute;
     module.BusinessLocationsEmptyError = BusinessLocationsEmptyError;
+    module.currentScript = currentScript;
 
     return module;
 
