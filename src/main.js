@@ -71,3 +71,4 @@ businessLocator.init = function () {
         }
     }
 };
+

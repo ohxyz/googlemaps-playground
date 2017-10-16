@@ -37,12 +37,6 @@ window.businessLocator = window.businessLocator === undefined
 
 ( function ( module, $ ) {
 
-    var BusinessLocationsEmptyError = function () {
-
-        this.name = 'BusinessLocationsEmptyError';
-        this.message = '[WARN] ' + 'Business locations are empty.';
-    }
-
     var conf = {
 
         googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
@@ -86,6 +80,13 @@ window.businessLocator = window.businessLocator === undefined
     function isGoolgeApisReady() {
 
         return isGoolgeScriptLoaded;
+    }
+
+
+    function BusinessLocationsEmptyError () {
+
+        this.name = 'BusinessLocationsEmptyError';
+        this.message = '[WARN] ' + 'Business locations are empty.';
     }
 
 
@@ -1212,3 +1213,4 @@ window.businessLocator = window.businessLocator === undefined
     return module;
 
 } )( window.businessLocator, jQuery );
+

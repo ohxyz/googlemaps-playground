@@ -12710,12 +12710,6 @@ window.businessLocator = window.businessLocator === undefined
 
 ( function ( module, $ ) {
 
-    var BusinessLocationsEmptyError = function () {
-
-        this.name = 'BusinessLocationsEmptyError';
-        this.message = '[WARN] ' + 'Business locations are empty.';
-    }
-
     var conf = {
 
         googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
@@ -12725,6 +12719,8 @@ window.businessLocator = window.businessLocator === undefined
         mapMarkerImage: '/src/marker-oe.png'
 
     };
+
+    var currentScript = document.currentScript;
 
     var isGoolgeScriptLoaded = false;
 
@@ -12757,6 +12753,13 @@ window.businessLocator = window.businessLocator === undefined
     function isGoolgeApisReady() {
 
         return isGoolgeScriptLoaded;
+    }
+
+
+    function BusinessLocationsEmptyError () {
+
+        this.name = 'BusinessLocationsEmptyError';
+        this.message = '[WARN] ' + 'Business locations are empty.';
     }
 
 
@@ -13878,6 +13881,7 @@ window.businessLocator = window.businessLocator === undefined
     module.ui = ui;
     module.compute = compute;
     module.BusinessLocationsEmptyError = BusinessLocationsEmptyError;
+    module.currentScript = currentScript;
 
     return module;
 
@@ -13917,6 +13921,9 @@ businessLocator.init = function () {
 
     var link = window.location.pathname;
     var locations = [];
+    var scriptElement = null;
+    var containerElement = null;
+    var containerName = 'business-locator';
 
     if ( link.indexOf( 'bbq-gas') !== -1 ) {
 
@@ -13926,12 +13933,24 @@ businessLocator.init = function () {
 
         locations = quickswapLocations;
     }
+    else {
 
-    var container = document.getElementsByClassName( 'business-locator')[ 0 ];
+        locations = businessLocator.locations;
+    }
+
+    containerElement = document.getElementsByClassName( containerName )[ 0 ];
+
+    if ( containerElement === null || containerElement === undefined ) {
+
+        containerElement = document.createElement( 'div' );
+        containerElement.setAttribute( 'id', containerName );
+        
+        this.currentScript.parentNode.insertBefore( containerElement, this.currentScript.nextSibling );
+    }
 
     try { 
     
-        this.ui.init( container, locations );
+        this.ui.init( containerElement, locations );
     }
     catch( error ) {
 
@@ -13942,3 +13961,4 @@ businessLocator.init = function () {
         }
     }
 };
+
