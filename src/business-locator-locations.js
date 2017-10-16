@@ -1,7 +1,11 @@
-if ( window.businessLocator === undefined ) {
-
-    window.businessLocator = {};
-}
+/* LPG business locations 
+ *
+ *
+ */
+ 
+window.businessLocator = window.businessLocator === undefined
+                       ? {}
+                       : window.businessLocator;
 
 window.businessLocator.locations = [ {
 

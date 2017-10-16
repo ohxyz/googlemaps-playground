@@ -9,20 +9,21 @@
 
 /* START: businessLocator module */
 
-if ( window.businessLocator === undefined ) {
 
-    window.businessLocator = {};
-}
+window.businessLocator = window.businessLocator === undefined
+                       ? {}
+                       : window.businessLocator;
 
-/* Module ------- ui ( module ) ------- component( module )
+
+/* Module ---+--- ui ( module ) ---+--- component( module )
  *           |                     |
- *           |                      --- dom ( module )
+ *           |                     +--- dom ( module )
  *           |                     |
- *           |                      --- map ( module )
+ *           |                     +--- map ( module )
  *           |
- *           |--- util (module )
+ *           +--- util (module )
  *           |
- *            --- compute ( module )
+ *           +--- compute ( module )
  *
  *
  *            ui.dom <- ui.component
@@ -39,6 +40,12 @@ if ( window.businessLocator === undefined ) {
  */
 
 ( function ( module, $ ) {
+
+    var BusinessLocationsEmptyError = function () {
+
+        this.name = 'BusinessLocationsEmptyError';
+        this.message = '[WARN] ' + 'Business locations are empty.';
+    }
 
     var conf = {
 
@@ -72,7 +79,7 @@ if ( window.businessLocator === undefined ) {
             } )
             .fail( function ( jqxhr, settings, exception ) {
 
-                console.error( 'BUSINESS LOCATOR ERROR: Failed to load Google Maps APIs.' );
+                console.error( '[ERROR]', 'Failed to load Google Maps APIs.' );
 
             } );
 
@@ -151,7 +158,7 @@ if ( window.businessLocator === undefined ) {
 
                 pageNumberClassName: 'page-number',
 
-                onButtonClick: function() {}
+                onPageNumberClick: function() {}
 
             }, options );
 
@@ -160,11 +167,11 @@ if ( window.businessLocator === undefined ) {
             var numOfPagesInTotal = Math.ceil( settings.numOfItemsInTotal / settings.numOfItemsPerPage );
             var numOfPageGroupsInTotal = Math.ceil( numOfPagesInTotal / settings.numOfPagesInPageGroup );
 
-            var $containerUl = null;
-            var $prevLi = null;
-            var $nextLi = null;
-            var $prevNLi = null;
-            var $nextNLi = null;
+            var $containerDiv = null;
+            var $prevSpan = null;
+            var $nextSpan = null;
+            var $prevGroupSpan = null;
+            var $nextGroupSpan = null;
 
             var $firstPageNumberLi = null;
             var pageNumberLis = [];
@@ -178,7 +185,7 @@ if ( window.businessLocator === undefined ) {
                 var pageNumer = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + 1;
 
                 renderPagination( pageGroupNumber );
-                settings.onButtonClick( pageNumer )
+                settings.onPageNumberClick( pageNumer )
 
                 setActive( $firstPageNumberLi );
                 setDisabled();
@@ -187,10 +194,10 @@ if ( window.businessLocator === undefined ) {
 
             function reRenderPagination( pageGroupNumber, activePageNumber ) {
 
-                var $containerParent = $containerUl.parent();
+                var $containerParent = $containerDiv.parent();
 
                 renderPagination( pageGroupNumber, activePageNumber );
-                $containerParent.append( $containerUl );
+                $containerParent.append( $containerDiv );
             }
 
 
@@ -200,27 +207,27 @@ if ( window.businessLocator === undefined ) {
              */
             function renderPagination( pageGroupNumber, activePageNumber ) {
 
-                if ( $containerUl !== null && $containerUl.length >= 1 ) {
+                if ( $containerDiv !== null && $containerDiv.length >= 1 ) {
 
-                    $containerUl.remove();
+                    $containerDiv.remove();
                 }
 
                 var activePageNumber = activePageNumber === undefined ? 1 : activePageNumber;
 
                 currentPage = ( pageGroupNumber - 1 ) * settings.numOfPagesInPageGroup + activePageNumber;
 
-                $containerUl = $( '<ul>', { 'class': 'pagination' } );
+                $containerDiv = $( '<div>', { 'class': 'pagination' } );
 
-                $prevLi = $( '<li>', { 'class': 'prev', 'html': '&lt;' } );
-                $nextLi = $( '<li>', { 'class': 'next', 'html': '&gt;' } );
-                $prevNLi = $( '<li>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
-                $nextNLi = $( '<li>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
+                $prevSpan = $( '<span>', { 'class': 'prev', 'html': '&lt;' } );
+                $nextSpan = $( '<span>', { 'class': 'next', 'html': '&gt;' } );
+                $prevGroupSpan = $( '<span>', { 'class': 'prev-n', 'html': '&lt;&lt;' } );
+                $nextGroupSpan = $( '<span>', { 'class': 'next-n', 'html': '&gt;&gt;' } );
 
-                $containerUl.append( $prevNLi, $prevLi );
-                renderPageGroup( pageGroupNumber, $containerUl );
-                $containerUl.append( $nextLi, $nextNLi );
+                $containerDiv.append( $prevGroupSpan, $prevSpan );
+                renderPageGroup( pageGroupNumber, $containerDiv );
+                $containerDiv.append( $nextSpan, $nextGroupSpan );
 
-                $containerUl.on( 'click', function ( event ) {
+                $containerDiv.on( 'click', function ( event ) {
 
                     if ( event.target === event.currentTarget ) {
 
@@ -255,7 +262,7 @@ if ( window.businessLocator === undefined ) {
                         return;
                     }
 
-                    $pageNumberLi = $( '<li>', { 'class': settings.pageNumberClassName, 'text': pageNumber } )
+                    $pageNumberLi = $( '<span>', { 'class': settings.pageNumberClassName, 'text': pageNumber } )
                     $pageNumberLi.data( propName, pageNumber );
 
                     $container.append( $pageNumberLi );
@@ -272,7 +279,7 @@ if ( window.businessLocator === undefined ) {
                     currentPage = $element.data( propName );
 
                 }
-                else if( $element.is( $prevLi ) ) {
+                else if( $element.is( $prevSpan ) ) {
 
                     if ( currentPage <= 1 ) {
 
@@ -288,7 +295,7 @@ if ( window.businessLocator === undefined ) {
                     }
 
                 }
-                else if ( $element.is( $nextLi ) ) {
+                else if ( $element.is( $nextSpan ) ) {
 
                     if ( currentPage >= numOfPagesInTotal ) {
 
@@ -303,7 +310,7 @@ if ( window.businessLocator === undefined ) {
                         reRenderPagination( currentPageGroup );
                     }
                 }
-                else if ( $element.is( $prevNLi ) ){
+                else if ( $element.is( $prevGroupSpan ) ){
 
                     if ( currentPageGroup <= 1 ) {
 
@@ -315,7 +322,7 @@ if ( window.businessLocator === undefined ) {
                     reRenderPagination( currentPageGroup );
 
                 }
-                else if ( $element.is( $nextNLi ) ) {
+                else if ( $element.is( $nextGroupSpan ) ) {
 
                     if ( currentPageGroup >= numOfPageGroupsInTotal ) {
 
@@ -328,7 +335,7 @@ if ( window.businessLocator === undefined ) {
 
                 }
 
-                settings.onButtonClick( currentPage );
+                settings.onPageNumberClick( currentPage );
                 setDisabled();
                 setActive();
             }
@@ -352,40 +359,40 @@ if ( window.businessLocator === undefined ) {
 
             function setDisabled() {
 
-                setDisabledBase( currentPage, numOfPagesInTotal, $prevLi, $nextLi );
-                setDisabledBase( currentPageGroup, numOfPageGroupsInTotal, $prevNLi, $nextNLi );
+                setDisabledBase( currentPage, numOfPagesInTotal, $prevSpan, $nextSpan );
+                setDisabledBase( currentPageGroup, numOfPageGroupsInTotal, $prevGroupSpan, $nextGroupSpan );
             }
 
 
             function setDisabledBase( currentPageOrPageGroup,
                                       numOfPagesOrPageGoupsInTotal,
-                                      $prevLiOrNLi,
-                                      $nextLiOrNLi ) {
+                                      $prevSpanOrGroupSpan,
+                                      $nextSpanOrGroupSpan ) {
 
                 if ( currentPageOrPageGroup === 1 && numOfPagesOrPageGoupsInTotal === 1 ) {
 
-                    $prevLiOrNLi.addClass( settings.disabledClassName );
-                    $nextLiOrNLi.addClass( settings.disabledClassName );
+                    $prevSpanOrGroupSpan.addClass( settings.disabledClassName );
+                    $nextSpanOrGroupSpan.addClass( settings.disabledClassName );
                 }
                 else if ( currentPageOrPageGroup === 1 ) {
 
-                    $prevLiOrNLi.addClass( settings.disabledClassName );
-                    $nextLiOrNLi.removeClass( settings.disabledClassName );
+                    $prevSpanOrGroupSpan.addClass( settings.disabledClassName );
+                    $nextSpanOrGroupSpan.removeClass( settings.disabledClassName );
                 }
                 else if ( currentPageOrPageGroup === numOfPagesOrPageGoupsInTotal ) {
 
-                    $nextLiOrNLi.addClass( settings.disabledClassName );
-                    $prevLiOrNLi.removeClass( settings.disabledClassName );
+                    $nextSpanOrGroupSpan.addClass( settings.disabledClassName );
+                    $prevSpanOrGroupSpan.removeClass( settings.disabledClassName );
                 }
                 else {
 
-                    $prevLiOrNLi.removeClass( settings.disabledClassName );
-                    $nextLiOrNLi.removeClass( settings.disabledClassName );
+                    $prevSpanOrGroupSpan.removeClass( settings.disabledClassName );
+                    $nextSpanOrGroupSpan.removeClass( settings.disabledClassName );
                 }
 
             }
 
-            return $containerUl;
+            return $containerDiv;
         }
 
         return {
@@ -528,7 +535,7 @@ if ( window.businessLocator === undefined ) {
             var $containerDiv = $( '<div>' );
             var $list = null;
 
-            var onButtonClick = function ( pageNumber ) {
+            var onPageNumberClick = function ( pageNumber ) {
 
                 if ( $list !== null ) {
 
@@ -564,7 +571,7 @@ if ( window.businessLocator === undefined ) {
 
                 numOfItemsPerPage: settings.numOfItemsPerPage,
 
-                onButtonClick: onButtonClick
+                onPageNumberClick: onPageNumberClick
 
             };
 
@@ -781,10 +788,15 @@ if ( window.businessLocator === undefined ) {
 
         function handleGeocodingReponse( response ) {
 
+            if ( ui.locations.length === 0 ) {
+
+                throw new BusinessLocationsEmptyError();
+            }
+
             var locationInfoFromSearch = response[ 0 ];
             var address = locationInfoFromSearch.formatted_address;
 
-            var geoLocation = locationInfoFromSearch.geometry.location
+            var geoLocation = locationInfoFromSearch.geometry.location;
             var latLng = {
 
                 lat: geoLocation.lat(), 
@@ -794,7 +806,6 @@ if ( window.businessLocator === undefined ) {
             compute.sortByDistance( latLng, ui.locations );
 
             var closestLocation = ui.locations[ 0 ];
-            var map = ui.map.getMap();
 
             ui.map.populateMarkers( map, ui.locations );
             ui.map.locateLocation( closestLocation );
@@ -808,7 +819,7 @@ if ( window.businessLocator === undefined ) {
 
                 items: ui.locations,
 
-                numOfItemsPerPage: 10,
+                numOfItemsPerPage: 6,
 
                 listItemFields: [ LocationTitle, LocationDetails, LocationDetailsImage ],
 
@@ -887,7 +898,7 @@ if ( window.businessLocator === undefined ) {
         var mapDiv = document.createElement( 'div' );
         mapDiv.setAttribute( 'id', 'map' );
 
-        function init( locations ) {
+        function init() {
 
             var googleMap = generateMap( uluru );
             
@@ -1036,9 +1047,9 @@ if ( window.businessLocator === undefined ) {
 
             var latLng = {
 
-                    lat: businessLocation.Latitude,
-                    lng: businessLocation.Longitude
-                };
+                lat: businessLocation.Latitude,
+                lng: businessLocation.Longitude
+            };
 
             var map = getMap();
 
@@ -1073,10 +1084,20 @@ if ( window.businessLocator === undefined ) {
  
         var $businessLocatorDiv = $( '#' + elementId );
 
-        uiMap.init( locations );
+        uiMap.init( );
         uiDom.init( $businessLocatorDiv, uiMap.getMap() );
 
-        this.locations = locations;        
+        if ( locations === undefined || locations.length === 0 ) {
+
+            throw new BusinessLocationsEmptyError();
+            
+            this.locations = [];
+        }
+        else {
+
+            this.locations = locations;     
+        }
+
         $businessLocatorDiv.append( uiDom.$buildSearchSection(), uiMap.container );
     };
 
@@ -1129,7 +1150,7 @@ if ( window.businessLocator === undefined ) {
                 }
                 else {
 
-                    console.error( 'Geocoder request failed.' );
+                    console.error( '[ERROR]', 'Geocoder request failed.' );
                 }
 
             } );
@@ -1178,6 +1199,7 @@ if ( window.businessLocator === undefined ) {
     module.util = util;
     module.ui = ui;
     module.compute = compute;
+    module.BusinessLocationsEmptyError = BusinessLocationsEmptyError;
 
     return module;
 

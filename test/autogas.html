@@ -12,8 +12,6 @@
 
         margin: 0;
         padding: 0;
-
-
     }
 
     li {
@@ -85,30 +83,17 @@
         color: #cccccc;
     }
     </style>
-    <link href="https://cdn.rawgit.com/mochajs/mocha/2.2.5/mocha.css" rel="stylesheet" />
     <link rel="icon" href="morty.png" />
 </head>
 
 <body>
-    <h2>UI Test</h2>
+    <h2>AUTOGAS Test</h2>
     <div id="business-locator"></div>
-    <h2>Code Test</h2>
-    <div id="mocha"></div>
-
-    <!-- Dev scripts -->
     <script src="../src/jquery.min.js"></script>
 
     <script src="../src/business-locator-locations.js"></script>
     <script src="../src/business-locator.js"></script>
     <script src="../src/main.js"></script>
-
-    <!-- UI test first. Load Google scripts and prepare for code test. -->
-    <script src="dummy-locations.js"></script>
-
-    <!-- Code test. Require Google APIs -->
-    <script src="mocha.js"></script>
-    <script src="chai.js"></script>
-    <script src="unit-test.js"></script>
     
 </body>
 </html>
