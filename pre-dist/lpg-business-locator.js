@@ -12714,9 +12714,9 @@ window.businessLocator = window.businessLocator === undefined
 
         googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
 
-        locationDetailsImage: '/src/locationDetails.png',
+        locationDetailsImage: '/content/dam/projects/lpg/location-details.png',
 
-        mapMarkerImage: '/src/marker-oe.png'
+        mapMarkerImage: '/content/dam/projects/lpg/marker.png'
 
     };
 
@@ -13161,7 +13161,9 @@ window.businessLocator = window.businessLocator === undefined
                                     .insertBefore( $searchButton );
                     return;
                 }
-                else if ( /^[0-9]{4}$/.test( postcode ) === false ) {
+                else if ( suburb === ''
+                        && state === ''
+                        && /^[0-9]{4}$/.test( postcode ) === false ) {
 
                     $errorMessageDiv.text( 'Postcode must be 4 digits.' )
                                     .insertBefore( $searchButton );
@@ -13938,9 +13940,17 @@ businessLocator.init = function () {
         locations = businessLocator.locations;
     }
 
-    containerElement = document.getElementsByClassName( containerName )[ 0 ];
+    containerElement = document.getElementById( containerName );
 
-    if ( containerElement === null || containerElement === undefined ) {
+
+    // Element not found by ID
+    if ( containerElement === null ) {
+
+        containerElement = document.getElementsByClassName( containerName )[ 0 ];
+    }
+
+    // Element not found by class name
+    if ( containerElement === undefined ) {
 
         containerElement = document.createElement( 'div' );
         containerElement.setAttribute( 'id', containerName );

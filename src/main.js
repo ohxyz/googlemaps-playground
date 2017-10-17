@@ -48,9 +48,17 @@ businessLocator.init = function () {
         locations = businessLocator.locations;
     }
 
-    containerElement = document.getElementsByClassName( containerName )[ 0 ];
+    containerElement = document.getElementById( containerName );
 
-    if ( containerElement === null || containerElement === undefined ) {
+
+    // Element not found by ID
+    if ( containerElement === null ) {
+
+        containerElement = document.getElementsByClassName( containerName )[ 0 ];
+    }
+
+    // Element not found by class name
+    if ( containerElement === undefined ) {
 
         containerElement = document.createElement( 'div' );
         containerElement.setAttribute( 'id', containerName );
