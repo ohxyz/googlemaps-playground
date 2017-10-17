@@ -445,24 +445,59 @@ window.businessLocator = window.businessLocator === undefined
             var $formRow2 = $formRow1.clone();
             var $formRow3 = $formRow1.clone();
 
-            var $suburbLabel = $( '<label>', { 'for': suburbTextInputId, 'text': 'Suburb' } );
-            var $suburbTextInput = $( '<input>', { 'id': suburbTextInputId, 
-                                                   'name': suburbTextInputId, 
-                                                   'type': 'text' } );
+            var $suburbLabel = $( '<label>', {
 
-            var $stateLabel = $( '<label>', { 'for': stateSelectId, 'text': 'State' } );
-            var $stateSelect = $( '<select>', { 'id': stateSelectId, 'name': stateSelectId } );
-            var $selectStateOption = $( '<option>', { 'value': '', 'text': 'Select State' } );
+                'id': suburbTextInputId + '-label',
+                'for': suburbTextInputId, 
+                'text': 'Suburb' 
+            } );
 
+            var $suburbTextInput = $( '<input>', {
 
-            var $postcodeLabel = $( '<label>', { 'for': postcodeId, 'text': 'Postcode' } );
-            var $postcodeTextInput = $( '<input>', { 'id': postcodeId, 
-                                                     'type': 'text', 
-                                                     'name': postcodeId } );
+                'id': suburbTextInputId, 
+                'name': suburbTextInputId, 
+                'type': 'text' 
+            } );
 
-            var $searchButton = $( '<button>', { 'id': searchButtonId, 
-                                                 'name': searchButtonId, 
-                                                 'text': 'Search' } );
+            var $stateLabel = $( '<label>', { 
+
+                'id': stateSelectId + '-label',
+                'for': stateSelectId, 
+                'text': 'State'
+            } );
+
+            var $stateSelect = $( '<select>', { 
+
+                'id': stateSelectId, 
+                'name': stateSelectId
+            } );
+
+            var $selectStateOption = $( '<option>', { 
+
+                'value': '', 
+                'text': 'Select State' 
+            } );
+
+            var $postcodeLabel = $( '<label>', { 
+
+                'id': postcodeId + '-label',
+                'for': postcodeId, 
+                'text': 'Postcode' 
+            } );
+
+            var $postcodeTextInput = $( '<input>', {
+
+                'id': postcodeId, 
+                'type': 'text', 
+                'name': postcodeId
+            } );
+
+            var $searchButton = $( '<button>', { 
+
+                'id': searchButtonId, 
+                'name': searchButtonId, 
+                'text': 'Search' 
+            } );
 
             var $errorMessageDiv = $( '<div>', { 'class': 'error-message' } );
 
@@ -822,7 +857,7 @@ window.businessLocator = window.businessLocator === undefined
 
                 listItemFields: [ LocationTitle, LocationDetails, LocationDetailsImage ],
 
-                listHeaderContent: [ 'Title', 'Address' ]
+                listHeaderContent: [ 'Name', 'Address' ]
 
             } );
 

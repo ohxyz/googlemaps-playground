@@ -13118,24 +13118,59 @@ window.businessLocator = window.businessLocator === undefined
             var $formRow2 = $formRow1.clone();
             var $formRow3 = $formRow1.clone();
 
-            var $suburbLabel = $( '<label>', { 'for': suburbTextInputId, 'text': 'Suburb' } );
-            var $suburbTextInput = $( '<input>', { 'id': suburbTextInputId, 
-                                                   'name': suburbTextInputId, 
-                                                   'type': 'text' } );
+            var $suburbLabel = $( '<label>', {
 
-            var $stateLabel = $( '<label>', { 'for': stateSelectId, 'text': 'State' } );
-            var $stateSelect = $( '<select>', { 'id': stateSelectId, 'name': stateSelectId } );
-            var $selectStateOption = $( '<option>', { 'value': '', 'text': 'Select State' } );
+                'id': suburbTextInputId + '-label',
+                'for': suburbTextInputId, 
+                'text': 'Suburb' 
+            } );
 
+            var $suburbTextInput = $( '<input>', {
 
-            var $postcodeLabel = $( '<label>', { 'for': postcodeId, 'text': 'Postcode' } );
-            var $postcodeTextInput = $( '<input>', { 'id': postcodeId, 
-                                                     'type': 'text', 
-                                                     'name': postcodeId } );
+                'id': suburbTextInputId, 
+                'name': suburbTextInputId, 
+                'type': 'text' 
+            } );
 
-            var $searchButton = $( '<button>', { 'id': searchButtonId, 
-                                                 'name': searchButtonId, 
-                                                 'text': 'Search' } );
+            var $stateLabel = $( '<label>', { 
+
+                'id': stateSelectId + '-label',
+                'for': stateSelectId, 
+                'text': 'State'
+            } );
+
+            var $stateSelect = $( '<select>', { 
+
+                'id': stateSelectId, 
+                'name': stateSelectId
+            } );
+
+            var $selectStateOption = $( '<option>', { 
+
+                'value': '', 
+                'text': 'Select State' 
+            } );
+
+            var $postcodeLabel = $( '<label>', { 
+
+                'id': postcodeId + '-label',
+                'for': postcodeId, 
+                'text': 'Postcode' 
+            } );
+
+            var $postcodeTextInput = $( '<input>', {
+
+                'id': postcodeId, 
+                'type': 'text', 
+                'name': postcodeId
+            } );
+
+            var $searchButton = $( '<button>', { 
+
+                'id': searchButtonId, 
+                'name': searchButtonId, 
+                'text': 'Search' 
+            } );
 
             var $errorMessageDiv = $( '<div>', { 'class': 'error-message' } );
 
@@ -13161,9 +13196,7 @@ window.businessLocator = window.businessLocator === undefined
                                     .insertBefore( $searchButton );
                     return;
                 }
-                else if ( suburb === ''
-                        && state === ''
-                        && /^[0-9]{4}$/.test( postcode ) === false ) {
+                else if ( postcode !== '' && /^[0-9]{4}$/.test( postcode ) === false ) {
 
                     $errorMessageDiv.text( 'Postcode must be 4 digits.' )
                                     .insertBefore( $searchButton );
@@ -13497,7 +13530,7 @@ window.businessLocator = window.businessLocator === undefined
 
                 listItemFields: [ LocationTitle, LocationDetails, LocationDetailsImage ],
 
-                listHeaderContent: [ 'Title', 'Address' ]
+                listHeaderContent: [ 'Name', 'Address' ]
 
             } );
 
@@ -13568,6 +13601,8 @@ window.businessLocator = window.businessLocator === undefined
         var map = null;
         var infoWindow = null;
         var uluru = { lat: -25.363, lng: 131.044 };
+        var markers = [];
+        var areMarkersAllPupulated = false;
 
         var mapDiv = document.createElement( 'div' );
         mapDiv.setAttribute( 'id', 'map' );
@@ -13661,7 +13696,6 @@ window.businessLocator = window.businessLocator === undefined
 
         /* Create a marker with infoWindow and zoomed in.
          *
-         * @summary - Only one Marker can be created on same latLng
          * @param { boolean } - withInfoWindow
          * 
          */
@@ -13694,6 +13728,11 @@ window.businessLocator = window.businessLocator === undefined
 
         function populateMarkers( map, locations ) {
 
+            if ( areMarkersAllPupulated === true ) {
+
+                return;
+            }
+
             var firstMarker = null;
             var firstLocation = null;
      
@@ -13713,7 +13752,35 @@ window.businessLocator = window.businessLocator === undefined
 
                 } );
 
+                markers.push( marker );
+
             } );
+
+            areMarkersAllPupulated = true;
+
+        }
+
+
+        function getMarker( latLng ) {
+
+            var markerPosition = null;
+            var marker = null;
+
+            for ( var i = 0; i < markers.length; i ++ ) {
+
+                marker = markers[ i ]
+                markerPosition = marker.getPosition();
+
+                console.log( 2, markerPosition.lat(), markerPosition.lng() );
+
+                if ( markerPosition.lat().toFixed( 2 ) === parseFloat( latLng.lat, 10 ).toFixed( 2 )
+                        && markerPosition.lng().toFixed( 2 ) === parseFloat( latLng.lng, 10 ).toFixed( 2 ) ) {
+
+
+                    return marker;
+                }
+            }
+
         }
 
 
@@ -13728,7 +13795,9 @@ window.businessLocator = window.businessLocator === undefined
             var map = getMap();
 
             zoomIn( map, latLng);
-            createMarker( map, businessLocation, true );
+
+            var marker = getMarker( latLng );
+            openInfoWindow( map, marker, businessLocation );   
         }
 
         return {
