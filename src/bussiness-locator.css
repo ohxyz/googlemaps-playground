@@ -5,7 +5,7 @@
 #business-locator #search-form {
   border-top: 4px solid #a71932;
   margin-bottom: 8px;
-  background-color: #eeeeee;
+  background-color: #f5f5f5;
   padding: 16px 12px;
   border-radius: 2px;
 }
@@ -49,7 +49,9 @@
   position: absolute;
   right: 0;
   outline: 0;
-  background-color: #f9eaea;
+  background-color: white;
+  font-weight: bold;
+  user-select: none;
 }
 
 #business-locator #search-form #search-business:hover{
@@ -140,6 +142,10 @@
   font-weight: bold;
 }
 
+#business-locator .location-details {
+  width: 65%;
+}
+
 #business-locator .location-title a {
   text-decoration: none;
 }
@@ -186,6 +192,7 @@
   max-width: 510px;
   display: block;
   border-radius: 0;
+  user-select: none;
 }
 
 #business-locator .pagination span {
@@ -196,7 +203,7 @@
   cursor: pointer;
   border-radius: 2px;
   float: left;
-  text-align: center;s
+  text-align: center;
   width: 32px;
 }
 

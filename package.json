@@ -1,7 +1,7 @@
 {
   "name": "lpg-business-locator",
   "version": "1.0.0",
-  "description": "",
+  "description": "Locate LPG bussiness locations like autogas and bbq gas",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -9,8 +9,14 @@
   "author": "",
   "devDependencies": {
     "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.9.0",
     "gulp-concat": "^2.6.1",
+    "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0"
   },
-  "license": ""
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://busheng-origin@bitbucket.org/busheng-origin/lpg-business-locator.git"
+  }
 }
