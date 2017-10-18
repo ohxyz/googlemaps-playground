@@ -218,9 +218,13 @@
   color: white;
 }
 
-#business-locator .pagination .disabled {
+#business-locator .pagination .disabled,
+#business-locator .pagination .disabled:hover {
+
   color: #cccccc;
   border-color: #cccccc;
+  background-color: white;
+  cursor: not-allowed;
 }
 
 #business-locator .info-window-content div {
