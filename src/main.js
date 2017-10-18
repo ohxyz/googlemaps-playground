@@ -4,30 +4,30 @@
  * 2. Definition of init
  */
 
-var vitalgasLocations = [];
-var quickswapLocations = [];
-
-window.businessLocator.locations.forEach( function ( businessLocation ) {
-
-    if ( businessLocation.Type === 'Both' ) {
-
-        vitalgasLocations.push( businessLocation );
-        quickswapLocations.push( businessLocation );
-    }
-
-    if ( businessLocation.Type === 'Vitalgas' ) {
-
-        vitalgasLocations.push( businessLocation );
-    }
-    else if ( businessLocation.Type === 'Quickswap' ) {
-
-        quickswapLocations.push( businessLocation );
-    }
-
-} );
-
 
 businessLocator.init = function () {
+
+    var vitalgasLocations = [];
+    var quickswapLocations = [];
+
+    this.locations.forEach( function ( businessLocation ) {
+
+        if ( businessLocation.Type === 'Both' ) {
+
+            vitalgasLocations.push( businessLocation );
+            quickswapLocations.push( businessLocation );
+        }
+
+        if ( businessLocation.Type === 'Vitalgas' ) {
+
+            vitalgasLocations.push( businessLocation );
+        }
+        else if ( businessLocation.Type === 'Quickswap' ) {
+
+            quickswapLocations.push( businessLocation );
+        }
+
+    } );
 
     var link = window.location.pathname;
     var locations = [];

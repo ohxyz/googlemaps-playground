@@ -20,6 +20,27 @@ var runTests = function ( ) {
 
         } );
 
+
+        describe( 'Method: makeAssetPath', function () { 
+
+            it( 'should return full path of a file', function () { 
+
+                var result = businessLocator.util.makeAssetPath( '/hello/world.js', '1.png' );
+
+                expect( result ).to.equal( '/hello/1.png' );
+
+            } );
+
+            it( 'should return original file path', function () { 
+
+                var result = businessLocator.util.makeAssetPath( '/hello/world.js', 'path/1.png' );
+
+                expect( result ).to.equal( 'path/1.png' );
+
+            } );
+
+        } );
+
     } );
 
 

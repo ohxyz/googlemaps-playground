@@ -6,18 +6,14 @@
   border-top: 4px solid #a71932;
   margin-bottom: 8px;
   background-color: #eeeeee;
-  padding: 12px;
+  padding: 16px 12px;
   border-radius: 2px;
 }
 
 #business-locator #search-form input[type=text] {
-  border-radius: 2px;
+  border-radius: 4px;
   border: 1px solid #cccccc;
-}
-
-#business-locator #search-form select {
-  border-radius: 2px;
-  border: 1px solid #cccccc;
+  height: 28px;
 }
 
 #business-locator #search-form .form-row {
@@ -25,37 +21,68 @@
   height: 40px;
 }
 
+#business-locator #search-form select {
+  border: 1px solid #cccccc;
+  height: 28px;
+}
+
 #business-locator #search-form label{
   position: absolute;
   padding-top: 2px;
 }
 
+#business-locator #search-form .error-message {
+  
+  position: absolute;
+  color: #a71932;
+  right: 100px;
+  top: 4px;
+}
+
+#business-locator #search-form #search-business{
+
+  color: #bf4e62;
+  border-radius: 4px;
+  border: 1px solid #d6939f;
+  padding: 2px 16px;
+  display: inline-block;
+  position: absolute;
+  right: 0;
+  outline: 0;
+  background-color: #f9eaea;
+}
+
+#business-locator #search-form #search-business:hover{
+
+  color: white;
+  border: 1px solid #a71932;
+  background-color: #a71932;
+}
 
 #business-locator #search-form #search-by-suburb {
   position: absolute;
   display: block;
   left: 20%;
-  width: 80%;  
+  width: 80%;
   
 }
 
 #business-locator #search-form #search-by-state {
   position: absolute;
   left: 20%;
+  width: 28%;
 }
 
 #business-locator #search-form #search-by-postcode-label {
   left: 50%;
-  width: 25%;
+  width: 15%;
   text-align: right;
-  padding-right: 12px;
-  
 }
 
 #business-locator #search-form #search-by-postcode {
   position: absolute;
-  left: 75%;
-  width: 25%;
+  left: 68%;
+  width: 32%;
 }
 
 #business-locator #map {
@@ -93,7 +120,7 @@
 #business-locator .list li span {
   display: inline-block;
   padding: 8px 12px;
-  
+  vertical-align: top;
 }
 
 #business-locator .list li.list-header {
@@ -109,15 +136,8 @@
 }
 
 #business-locator .location-title {
-
   width: 30%;
   font-weight: bold;
-  
-}
-
-#business-locator .address-details {
-
-  
 }
 
 #business-locator .location-title a {
@@ -129,8 +149,9 @@
   color: #a71932;
 }
 
-#business-locator .location-details {
+#business-locator .location-title a:focus {
 
+  color: #a71932;
 }
 
 #business-locator .location-details-image {
@@ -159,19 +180,24 @@
 }
 
 #business-locator .pagination {
-  margin: 8px;
+  margin: 8px auto;
   text-align: center;
   width: 100%;
+  max-width: 510px;
+  display: block;
+  border-radius: 0;
 }
 
 #business-locator .pagination span {
-  padding: 4px 8px;
+  padding: 4px 0;
   border: 1px solid #a71932;
   color: #a71932;
-  margin: 0 2px;
+  margin: 2px;
   cursor: pointer;
   border-radius: 2px;
-  user-select: none;
+  float: left;
+  text-align: center;s
+  width: 32px;
 }
 
 #business-locator .pagination span:hover {
@@ -184,10 +210,14 @@
   color: white;
 }
 
-
 #business-locator .pagination .disabled {
   color: #cccccc;
   border-color: #cccccc;
+}
+
+#business-locator .info-window-content div {
+  width: 100%;
+  margin: 4px 0;
 }
 
 

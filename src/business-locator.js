@@ -41,9 +41,9 @@ window.businessLocator = window.businessLocator === undefined
 
         googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
 
-        locationDetailsImage: '/content/dam/projects/lpg/location-details.png',
+        locationDetailsImage: 'location-details.png',
 
-        mapMarkerImage: '/content/dam/projects/lpg/marker.png'
+        mapMarkerImage: 'marker.png'
 
     };
 
@@ -106,8 +106,21 @@ window.businessLocator = window.businessLocator === undefined
             var sep = seperator === undefined ? ' ' : seperator;
 
             return [ businessLocation.Address1, businessLocation.Suburb, businessLocation.Postcode ].join( sep );
-        }
+        },
 
+        makeAssetPath: function ( fromPath, filePath ) {
+
+            if ( fromPath.indexOf( '/' ) === -1 || filePath.indexOf( '/') !== -1 ) {
+
+                return filePath;
+            }
+
+            var lastIndexOfSlash = fromPath.lastIndexOf( '/' );
+            var precedingPart = fromPath.slice( 0, lastIndexOfSlash + 1 );
+
+            return precedingPart + filePath;
+
+        }
     };
 
 
@@ -120,8 +133,8 @@ window.businessLocator = window.businessLocator === undefined
 
         images: {
 
-            locationDetails: conf.locationDetailsImage,
-            mapMarker: conf.mapMarkerImage
+            locationDetails: util.makeAssetPath( currentScript.src, conf.locationDetailsImage ),
+            mapMarker: util.makeAssetPath( currentScript.src, conf.mapMarkerImage )
         }
     }
 
@@ -1098,7 +1111,7 @@ window.businessLocator = window.businessLocator === undefined
                 marker = markers[ i ]
                 markerPosition = marker.getPosition();
 
-                console.log( 2, markerPosition.lat(), markerPosition.lng() );
+                // console.log( 2, markerPosition.lat(), markerPosition.lng() );
 
                 if ( markerPosition.lat().toFixed( 2 ) === parseFloat( latLng.lat, 10 ).toFixed( 2 )
                         && markerPosition.lng().toFixed( 2 ) === parseFloat( latLng.lng, 10 ).toFixed( 2 ) ) {
