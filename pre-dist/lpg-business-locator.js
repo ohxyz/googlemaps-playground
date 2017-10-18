@@ -14009,13 +14009,13 @@ businessLocator.init = function () {
     var containerElement = null;
     var containerName = 'business-locator';
 
-    if ( link.indexOf( 'bbq-gas') !== -1 ) {
+    if ( link.indexOf( 'bbq-gas') >=0 ) {
 
         locations = quickswapLocations;
     }
-    else if ( link.indexOf( 'autogas' ) !== -1 ) {
+    else if ( link.indexOf( 'autogas' ) >=0 ) {
 
-        locations = quickswapLocations;
+        locations = vitalgasLocations;
     }
     else {
 

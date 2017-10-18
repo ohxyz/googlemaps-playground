@@ -24,6 +24,7 @@
 #business-locator #search-form select {
   border: 1px solid #cccccc;
   height: 28px;
+  background-color: white;
 }
 
 #business-locator #search-form label{
@@ -50,8 +51,8 @@
   right: 0;
   outline: 0;
   background-color: white;
-  font-weight: bold;
   user-select: none;
+  font-weight: bold;
 }
 
 #business-locator #search-form #search-business:hover{
@@ -226,5 +227,4 @@
   width: 100%;
   margin: 4px 0;
 }
-
 
