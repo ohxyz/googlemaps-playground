@@ -73,19 +73,19 @@
 #business-locator #search-form #search-by-state {
   position: absolute;
   left: 20%;
-  width: 28%;
+  width: 25%;
 }
 
 #business-locator #search-form #search-by-postcode-label {
   left: 50%;
-  width: 15%;
+  width: 18%;
   text-align: right;
 }
 
 #business-locator #search-form #search-by-postcode {
   position: absolute;
-  left: 68%;
-  width: 32%;
+  left: 72%;
+  width: 28%;
 }
 
 #business-locator #map {

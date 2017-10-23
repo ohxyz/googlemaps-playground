@@ -8,7 +8,7 @@ var runTests = function ( ) {
 
     describe( 'Util module', function () {
 
-        describe( 'Method: camelToHyphen', function () { 
+        describe( 'Function: camelToHyphen', function () { 
 
             it( 'should convert capital letters to hyphens', function () { 
 
@@ -21,7 +21,7 @@ var runTests = function ( ) {
         } );
 
 
-        describe( 'Method: makeAssetPath', function () { 
+        describe( 'Function: makeAssetPath', function () { 
 
             it( 'should return full path of a file', function () { 
 
@@ -51,7 +51,7 @@ var runTests = function ( ) {
         var $state = $( '#search-by-state' );
         var $postcode = $( '#search-by-postcode' );
 
-        describe( 'Method: getSearchContent', function () {
+        describe( 'Function: getSearchContent', function () {
 
             it( 'should get concated search content', function () {
 
@@ -116,7 +116,7 @@ var runTests = function ( ) {
 
 
         // How to measure distance: https://support.google.com/maps/answer/1628031?co=GENIE.Platform%3DDesktop&hl=en&oco=1
-        describe( 'Method: calulateDistance', function () {
+        describe( 'Function: calulateDistance', function () {
 
             it( 'should be about 713km from Melbourne to Sydney', function () { 
 
@@ -134,7 +134,7 @@ var runTests = function ( ) {
 
         } );
 
-        describe( 'Method: sortByDistance', function () {
+        describe( 'Function: sortByDistance', function () {
 
             businessLocator.compute.sortByDistance( melbourne, dummyLocations );
 

@@ -4,7 +4,6 @@
  * 2. Definition of init
  */
 
-
 businessLocator.init = function () {
 
     var vitalgasLocations = [];
@@ -78,5 +77,6 @@ businessLocator.init = function () {
 
         }
     }
+
 };
 
