@@ -39,7 +39,7 @@ window.businessLocator = window.businessLocator === undefined
 
     var conf = {
 
-        googleApiKey: 'AIzaSyAKsr_E9y7YQPuN2dwL48GxLB72iEkYxKY',
+        googleApiKey: 'AIzaSyAPzhkmv3JDFBQNt6yBLT8nb3031PJH7v0',
 
         locationDetailsImage: 'location-details.png',
 

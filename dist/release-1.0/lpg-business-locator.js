@@ -12811,8 +12811,7 @@ window.businessLocator = window.businessLocator === undefined
         }
     }
 
-    /*
-     * Each item in this array, is a `businessLocation` object
+    /* Each item in this array, is a `businessLocation` object
      * `businessLocation` is used as the name of arguments in various functions.
      *
      */
@@ -13089,7 +13088,7 @@ window.businessLocator = window.businessLocator === undefined
 
     
     /* 
-     * UI DOM submodule
+     * UI DOM module
      *
      */
     ui.dom = ( function () {
@@ -13395,9 +13394,7 @@ window.businessLocator = window.businessLocator === undefined
 
                     } );
                 }
-
-                // Only for JSON like object
-                else if ( typeof prop === 'object' ) {
+                else if ( typeof prop === 'object' ) { /* Only for JSON like object */
 
                     for ( var key in prop ) {
 
@@ -13606,7 +13603,7 @@ window.businessLocator = window.businessLocator === undefined
     } )();
 
 
-    /* UI Map submodule - Google Maps APIs related
+    /* UI Map module - Google Maps APIs related
      *
      */
     ui.map = ( function () {
@@ -13784,8 +13781,6 @@ window.businessLocator = window.businessLocator === undefined
                 marker = markers[ i ]
                 markerPosition = marker.getPosition();
 
-                // console.log( 2, markerPosition.lat(), markerPosition.lng() );
-
                 if ( markerPosition.lat().toFixed( 2 ) === parseFloat( latLng.lat, 10 ).toFixed( 2 )
                         && markerPosition.lng().toFixed( 2 ) === parseFloat( latLng.lng, 10 ).toFixed( 2 ) ) {
 
@@ -13890,7 +13885,6 @@ window.businessLocator = window.businessLocator === undefined
 
         /*
          *
-         *
          * @todo Handle failed requests
          */
         function getCoords( address, onSuccess ) {
@@ -13924,7 +13918,6 @@ window.businessLocator = window.businessLocator === undefined
 
         /*
          * 
-         *
          * @param { Object } coords - eg. { lat: 12, lng: 34 }
          */
         function sortByDistance( coords, locations ) {
@@ -13977,7 +13970,6 @@ window.businessLocator = window.businessLocator === undefined
  * 1. Filter out Vitagas and Quickswap
  * 2. Definition of init
  */
-
 
 businessLocator.init = function () {
 
@@ -14052,5 +14044,6 @@ businessLocator.init = function () {
 
         }
     }
+
 };
 
