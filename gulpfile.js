@@ -15,6 +15,7 @@ gulp.task( 'concat-js', () => {
 
     let files = [
 
+        './src/currentscript-polyfill.js',
         './src/business-locator-locations.js',
         './src/business-locator.js',
         './src/main.js'
