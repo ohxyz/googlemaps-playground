@@ -47,7 +47,8 @@ window.businessLocator = window.businessLocator === undefined
 
     };
 
-    var currentScript = document.currentScript;
+    // BUGFIX: IE does not have currentScript
+    var currentScript = document.currentScript || currentExecutingScript();
 
     var isGoolgeScriptLoaded = false;
 
