@@ -475,6 +475,21 @@ _nearestExecutingScript.skipStackDepth = 1;
   })
 );
 
+/* Fix Function#name on browsers that do not support it (IE):
+ *
+ * Source: https://stackoverflow.com/questions/6903762/function-name-not-supported-in-ie
+ */
+if (!(function f() {}).name) {
+    Object.defineProperty(Function.prototype, 'name', {
+        get: function() {
+            var name = (this.toString().match(/^function\s*([^\s(]+)/) || [])[1];
+            // For better performance only parse once, and then cache the
+            // result through a new accessor for repeated access.
+            Object.defineProperty(this, 'name', { value: name });
+            return name;
+        }
+    });
+}
 /* LPG business locations 
  *
  *
@@ -14007,7 +14022,7 @@ window.businessLocator = window.businessLocator === undefined
 
             // Create DOM element class names. Function names are class names.
             var LocationDetails = function ( arg ) { return $createAddressDetails( arg ); };
-            var LocationDetailsImage = function( arg) { return $createLocationDetailsImage( arg ); };
+            var LocationDetailsImage = function( arg ) { return $createLocationDetailsImage( arg ); };
             var LocationTitle = function ( arg ) { return $createLocationNameLink( arg ); };
 
             var $searchResultsList = $buildSearchResultsList( {

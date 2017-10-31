@@ -16,6 +16,7 @@ gulp.task( 'concat-js', () => {
     let files = [
 
         './src/currentExecutingScript.js',
+        './src/ie-patches.js',
         './src/business-locator-locations.js',
         './src/business-locator.js',
         './src/main.js'

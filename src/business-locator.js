@@ -857,7 +857,7 @@ window.businessLocator = window.businessLocator === undefined
 
             // Create DOM element class names. Function names are class names.
             var LocationDetails = function ( arg ) { return $createAddressDetails( arg ); };
-            var LocationDetailsImage = function( arg) { return $createLocationDetailsImage( arg ); };
+            var LocationDetailsImage = function( arg ) { return $createLocationDetailsImage( arg ); };
             var LocationTitle = function ( arg ) { return $createLocationNameLink( arg ); };
 
             var $searchResultsList = $buildSearchResultsList( {
