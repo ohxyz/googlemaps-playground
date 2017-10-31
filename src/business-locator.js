@@ -856,9 +856,9 @@ window.businessLocator = window.businessLocator === undefined
             ui.map.locateLocation( closestLocation );
 
             // Create DOM element class names. Function names are class names.
-            var LocationDetails = function ( arg ) { return $createAddressDetails( arg ); };
-            var LocationDetailsImage = function( arg ) { return $createLocationDetailsImage( arg ); };
-            var LocationTitle = function ( arg ) { return $createLocationNameLink( arg ); };
+            function LocationDetails( arg ) { return $createAddressDetails( arg ); };
+            function LocationDetailsImage( arg ) { return $createLocationDetailsImage( arg ); };
+            function LocationTitle( arg ) { return $createLocationNameLink( arg ); };
 
             var $searchResultsList = $buildSearchResultsList( {
 

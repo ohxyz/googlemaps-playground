@@ -1,5 +1,4 @@
 /* Fix Function#name on browsers that do not support it (IE):
- *
  * Source: https://stackoverflow.com/questions/6903762/function-name-not-supported-in-ie
  * 
  * Function.name is considered not standard at the time I'm writing. So it is not a polyfill.
